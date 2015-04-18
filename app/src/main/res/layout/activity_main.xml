@@ -1,0 +1,252 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
+    android:keepScreenOn="true"
+    style="@style/AppTheme"
+    android:fontFamily="sans-serif-thin" >
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Location Status"
+        android:id="@+id/txtGpsStatus"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="22dp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Waiting for fix"
+        android:id="@+id/gpsStatus"
+        android:layout_marginRight="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_alignTop="@+id/txtGpsStatus"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textColor="#fff00000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Accuracy in m"
+        android:id="@+id/txtNoOfSats"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="52dp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="0.0"
+        android:id="@+id/gpsAccuracy"
+        android:layout_marginRight="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_alignTop="@+id/txtNoOfSats"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Currently logging?"
+        android:id="@+id/txtIsLogging"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="82dp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="No"
+        android:id="@+id/isLogging"
+        android:layout_marginRight="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_alignTop="@+id/txtIsLogging"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textColor="#ff0000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Lock"
+        android:id="@+id/txtLock"
+        android:layout_below="@+id/isLogging"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="22dp"
+        android:layout_marginTop="22dp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:id="@+id/switchLock"
+        android:layout_below="@+id/isLogging"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="22dp"
+        android:layout_marginTop="22dp"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Current speed in km/h"
+        android:id="@+id/txtCurrentSpeed"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="172dp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="0.0"
+        android:id="@+id/currentSpeed"
+        android:layout_marginRight="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_alignTop="@+id/txtCurrentSpeed"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Average speed"
+        android:id="@+id/txtAvgSpeed"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="202dp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="0.0"
+        android:id="@+id/avgSpeed"
+        android:layout_marginRight="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_alignTop="@+id/txtAvgSpeed"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:fontFamily="sans-serif"
+        android:text="Audio mode"
+        android:id="@+id/musicMode"
+        android:layout_marginTop="242dp"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/musicMode" >
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:fontFamily="sans-serif-thin"
+            android:text="No feedback"
+            android:id="@+id/radioButtonNon"
+            android:layout_marginLeft="22dp"
+            android:layout_marginStart="22dp" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:fontFamily="sans-serif-thin"
+            android:text="Discrete feedback"
+            android:id="@+id/radioButtonDisc"
+            android:layout_below="@+id/radioButtonNon"
+            android:layout_marginLeft="22dp"
+            android:layout_marginStart="22dp"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:fontFamily="sans-serif-thin"
+            android:text="Continuous feedback"
+            android:id="@+id/radioButtonCont"
+            android:layout_below="@+id/radioButtonCont"
+            android:layout_marginLeft="22dp"
+            android:layout_marginStart="22dp"/>
+
+    </RadioGroup>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/createFile"
+        android:text="New running session"
+        android:textColor="#000000"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/switchStartLogging"
+        android:fontFamily="sans-serif-thin" />
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start logging"
+        android:id="@+id/switchStartLogging"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="22dp"
+        android:fontFamily="sans-serif-thin" />
+
+</RelativeLayout>
