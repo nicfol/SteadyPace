@@ -20,7 +20,10 @@ package com.nicolaifoldager.p4_prototype;                                       
 
 //-------------------------------- LIBRARIES BELOW -----------------------------------------------//
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -89,7 +92,7 @@ public class MainActivity extends ActionBarActivity {                           
                 "/Android/data/com.nicolaifoldager.p4_prototype/";                                  /*Specify the path to the file directory we will save to*/
 
         //Construction a LocationManager to call for the location_service in android
-        LocationManager locationManager = (LocationManager) this.getSystemService
+        final LocationManager locationManager = (LocationManager) this.getSystemService
                 (Context.LOCATION_SERVICE);
 
         //Construct classes - Why global? Cause garbage collection <3
@@ -113,19 +116,6 @@ public class MainActivity extends ActionBarActivity {                           
 //---------------------------------------- INIT PD ABOVE -----------------------------------------//
 
 
-//------------------------------------ RADIO BUTTONS BELOW ---------------------------------------//
-
-        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
-
-        final RadioButton radioBtnNon = (RadioButton) findViewById(R.id.radioButtonNon);
-        final RadioButton radioBtnDisc = (RadioButton) findViewById(R.id.radioButtonDisc);
-        final RadioButton radioBtnCont = (RadioButton) findViewById(R.id.radioButtonCont);
-
-        radioBtnNon.setChecked(true);
-
-//-------------------------------- RADIO BUTTONS ABOVE -------------------------------------------//
-
-
 //--------------------------------------- INIT BELOW ---------------------------------------------//
 
         if(media.rwAccess()) {
@@ -141,14 +131,28 @@ public class MainActivity extends ActionBarActivity {                           
             userId[0] = Media.getId();
             audioMode[0] = Media.getMode();
 
-            fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" + String.valueOf(System.currentTimeMillis()) + ".txt";
+            fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" +
+                    String.valueOf(System.currentTimeMillis()) + ".txt";
 
         } else {
             String toastMsg = "Read/write access not granted. Folder has not been created!";
             Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
         }
 
+        checkGPS();
+
 //--------------------------------------- INIT ABOVE ---------------------------------------------//
+
+
+//------------------------------------ RADIO BUTTONS BELOW ---------------------------------------//
+
+        final RadioButton radioBtnNon = (RadioButton) findViewById(R.id.radioButtonNon);
+        final RadioButton radioBtnDisc = (RadioButton) findViewById(R.id.radioButtonDisc);
+        final RadioButton radioBtnCont = (RadioButton) findViewById(R.id.radioButtonCont);
+
+        radioBtnNon.setChecked(true);
+
+//-------------------------------- RADIO BUTTONS ABOVE -------------------------------------------//
 
 
 //-------------------------------- LOCATION LISTENER BELOW ---------------------------------------//
@@ -285,6 +289,9 @@ public class MainActivity extends ActionBarActivity {                           
 
                     switchLogging.toggle();                                                         /*Toggles the switch back to off state*/
 
+                } else if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    checkGPS();
+                    switchLogging.toggle();
                 } else if (switchLogging.isChecked()) {                                             /*If the switch is already checked then run the scope*/
                     Log.i("Main/Logging listener", "on / logging");
 
@@ -338,7 +345,8 @@ public class MainActivity extends ActionBarActivity {                           
                         iterations[0] = 1.0;
                         fileName[0] = null;
                         Log.i("Main/Logging listener", "Variables reset: avgSpeed, iterations & currentFileName");
-                        Log.i("Main/Logging listener", "Iterations: " + iterations[0] + " Average Speed: " + avgSpeed + " Current filename: " + fileName[0]);
+                        Log.i("Main/Logging listener", "Iterations: " + iterations[0] +
+                                " Average Speed: " + avgSpeed + " Current filename: " + fileName[0]);
 
                     }
                 }
@@ -360,7 +368,8 @@ public class MainActivity extends ActionBarActivity {                           
                         userId[0] = Media.getId();
                         audioMode[0] = Media.getMode();
 
-                        fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" + String.valueOf(System.currentTimeMillis() + ".txt");
+                        fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" +
+                                String.valueOf(System.currentTimeMillis() + ".txt");
 
                         Media.createFile(folderName, fileName[0]);                           /*Creates a new file with the name of fileName[0] and location of folderName*/
                         Logging.startWriter(folderName, fileName[0]);                        /*Starts a writer to the file in folderName/fileName[0]*/
@@ -380,6 +389,32 @@ public class MainActivity extends ActionBarActivity {                           
         StrictMode.ThreadPolicy policy =
                 new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+    }
+
+    void checkGPS() {
+
+        LocationManager manager = (LocationManager) this.getSystemService
+                (Context.LOCATION_SERVICE);                                                         /*Construct a new LocationManager to check the GPS provider*/
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {                             /*Check if the location provider is the GPS*/
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);                 /*Construct a new dialog box*/
+            alertDialogBuilder.setMessage("GPS is disabled, please enable it before continuing.")   /*Sets the message in the dialog box*/
+                    .setPositiveButton("Location settings",                                         /*Sets the name of the positive button*/
+                            new DialogInterface.OnClickListener() {                                 /*Creates the on click listener service*/
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Intent callGPSSettingIntent = new Intent(
+                                       android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);  /*Links to the location service settings within Android OS*/
+                                    startActivity(callGPSSettingIntent);
+                                }
+                            });
+            alertDialogBuilder.setNegativeButton("Cancel",                                          /*Sets the name of the negative button*/
+                    new DialogInterface.OnClickListener() {                                         /*Creates the on click listener service*/
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();                                                        /*Cancels the dialog box*/
+                        }
+                    });
+            AlertDialog alert = alertDialogBuilder.create();                                        /*Constructs the dialog*/
+            alert.show();                                                                           /*Shows the dialog box*/
+        }
     }
 
 } //MainActivity
