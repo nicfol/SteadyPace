@@ -12,4 +12,8 @@
 		android:entryValues="@array/outchannels_values" android:entries="@array/outchannels_labels"
 		android:title="@string/pref_title_outchannels" android:summary="@string/pref_sum_outchannels"></ListPreference>
 </PreferenceScreen>
+<<<<<<< HEAD
 <!-- From: file:/C:/Users/Home/Documents/GitHub/Android/p4_prototype/PdCore/res/xml/preferences.xml --><!-- From: file:/C:/Users/Home/Documents/GitHub/Android/p4_prototype/PdCore/build/intermediates/bundles/debug/res/xml/preferences.xml -->
+=======
+<!-- From: file:/C:/Users/Nicolai/Documents/GitHub/Android/p4_prototype/PdCore/res/xml/preferences.xml --><!-- From: file:/C:/Users/Nicolai/Documents/GitHub/Android/p4_prototype/PdCore/build/intermediates/bundles/debug/res/xml/preferences.xml -->
+>>>>>>> origin/master
