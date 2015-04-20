@@ -385,7 +385,7 @@ public class MainActivity extends ActionBarActivity {                           
             });
 
 //-------------------------------- FILE CREATION ABOVE -------------------------------------------//
-
++
         StrictMode.ThreadPolicy policy =
                 new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
