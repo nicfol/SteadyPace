@@ -36,7 +36,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -113,8 +112,8 @@ public class MainActivity extends ActionBarActivity {                           
 
         //Initializes the PD library and opens an sound output
         try {
-            sound.init_pd();
-            sound.loadPdPatch();
+            init_pd();
+            loadPdPatch();
         } catch (IOException e) {
             e.printStackTrace(System.out);
         } catch (Exception e) {
@@ -147,7 +146,7 @@ public class MainActivity extends ActionBarActivity {                           
             Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
         }
 
-        checkGPS();
+        checkGPS();                                                                                 /*Runs the method to check if GPS is enabled*/
 
 //--------------------------------------- INIT ABOVE ---------------------------------------------//
 
@@ -188,7 +187,6 @@ public class MainActivity extends ActionBarActivity {                           
                     if (radioBtnNon.isChecked() || radioBtnDisc.isChecked() ||
                             radioBtnCont.isChecked()) {
 
-                    /*Write unix time, speed in kph, accuracy in meters to a new line*/
                         try {
                             String msg = iterations[0] + "\t" + speedKPH + "\t" + accuracy + "\t\t"
                                     + iterations[0] + "," + getLat + "," + getLon + "\n";
@@ -202,14 +200,10 @@ public class MainActivity extends ActionBarActivity {                           
                             e.printStackTrace(System.out);
                         }
 
-
-
                         if (radioBtnDisc.isChecked()) {
 
 
                         } else if (radioBtnCont.isChecked()) {
-
-                            sound.floatToPd("Volume", 100.0f);
 
                         }
 
@@ -327,7 +321,7 @@ public class MainActivity extends ActionBarActivity {                           
 
                     try {
                         String endMsg = "\n\t\t\t\t\t\t" + iterations[0] + "\n\t\t\t\t\t\t" +
-                                avgSpeed + "\n\t\t\t\t\t\t" + loggedTime;
+                                avgSpeed + "\n\t\t\t\t\t\t" + loggedTime; 
 
                         logWriter.stopWriter(endMsg);                                               /*Writes endMsg to the FileWriter and closes the FileWriter*/
                     } catch (IOException e) {
@@ -345,9 +339,11 @@ public class MainActivity extends ActionBarActivity {                           
 
                     Media.uploadFTP(fileName[0]);                                                   /*Upload the logfile to a FTP server.*/
 
-                    //Reset average speed % iteration counter to 0 if they're not. It also sets the
-                    // current file name to null, this is to make sure we don't write to the same
-                    // file twice.
+                    /*
+                     * Reset average speed % iteration counter to 0 if they're not.
+                     * It also sets the current file name to null, this is to make
+                     * sure we don't write to the same file twice.
+                     */
                     if(avgSpeed != 0.0 || iterations[0] != 0.0 || fileName[0] != null) {
                         avgSpeed = 0.0;
                         iterations[0] = 1.0;
@@ -415,7 +411,7 @@ public class MainActivity extends ActionBarActivity {                           
                                 public void onClick(DialogInterface dialog, int id) {
                                     Intent callGPSSettingIntent = new Intent(
                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);  /*Links to the location service settings within Android OS*/
-                                    startActivity(callGPSSettingIntent);
+                                    startActivity(callGPSSettingIntent);                            /*Starts the activity and opens location settings*/
                                 }
                             });
             alertDialogBuilder.setNegativeButton("Cancel",                                          /*Sets the name of the negative button*/
@@ -427,6 +423,75 @@ public class MainActivity extends ActionBarActivity {                           
             AlertDialog alert = alertDialogBuilder.create();                                        /*Constructs the dialog*/
             alert.show();                                                                           /*Shows the dialog box*/
         }
+    }
+
+    private PdUiDispatcher dispatcher;
+
+    /**
+     * Initializes PD Library and prepares the audio outlet.
+     *
+     * @throws IOException
+     */
+    public void init_pd() throws IOException {
+
+        // Configure the audio glue
+        int sampleRate = AudioParameters.suggestSampleRate();
+        PdAudio.initAudio(sampleRate, 0, 2, 8, true);
+
+        // Create and install the dispatcher
+        dispatcher = new PdUiDispatcher();
+        PdBase.setReceiver(dispatcher);
+
+    }
+
+    /**
+     * Loads the PD patch so the app can communicate with it.
+     *
+     * @throws IOException
+     */
+    void loadPdPatch() throws Exception {
+
+        File dir = getFilesDir();
+
+        IoUtils.extractZipResource(getResources().openRawResource(R.raw.pdpatch), dir, true);
+        File patchFile = new File(dir, "pdpatch.pd");
+        PdBase.openPatch(patchFile.getAbsolutePath());
+
+        Log.i("MainActiviy/loadPdPatch", "Patch loaded");
+
+        floatToPd("osc_volume", 0.3f);
+
+        floatToPd("osc_pitch", 614.0f);
+
+    }
+
+    /**
+     * Sends a float to the PD patch previously loaded in loadPdPatch method
+     *
+     * @param receiver  The name of the receiver within the pd patch in a string
+     * @param value     The value to send to the receiver as a float
+     */
+    public void floatToPd(String receiver, Float value) {
+
+        PdBase.sendFloat(receiver, value);
+        Log.i("MainActivity/floatToPd", "Send " + value + " to " + receiver);
+
+    }
+
+    /**
+     * Starts the audio
+     */
+    public void startAudio() {
+
+        PdAudio.startAudio(this);
+    }
+
+    /**
+     * Stop the audio
+     */
+    public void stopAudio() {
+
+        PdAudio.stopAudio();
     }
 
 } //MainActivity
