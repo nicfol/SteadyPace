@@ -321,7 +321,7 @@ public class MainActivity extends ActionBarActivity {                           
 
                     try {
                         String endMsg = "\n\t\t\t\t\t\t" + iterations[0] + "\n\t\t\t\t\t\t" +
-                                avgSpeed + "\n\t\t\t\t\t\t" + loggedTime; 
+                                avgSpeed + "\n\t\t\t\t\t\t" + loggedTime;
 
                         logWriter.stopWriter(endMsg);                                               /*Writes endMsg to the FileWriter and closes the FileWriter*/
                     } catch (IOException e) {
