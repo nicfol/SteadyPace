@@ -30,7 +30,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.StrictMode;
+import android.os.PowerManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
@@ -56,6 +56,9 @@ import java.io.IOException;
 
 public class MainActivity extends ActionBarActivity {                                               /*Extends this ActionBarActivity into our MainActivity. This shows the black bar in the top*/
 
+    //Wakelocks
+    PowerManager.WakeLock mWakeLock = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {                                            /*Runs when the activity is created*/
 
@@ -69,6 +72,14 @@ public class MainActivity extends ActionBarActivity {                           
 
 
 //-------------------------------- ANDROID INIT ABOVE --------------------------------------------//
+
+
+//------------------------------------ WAKELOCK BELOW --------------------------------------------//
+
+        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, MainActivity.class.getSimpleName());
+
+//------------------------------------ WAKELOCK ABOVE --------------------------------------------//
 
 
 //-------------------------------- VARIABLES & CONSTRUCTORS BELOW --------------------------------//
@@ -308,6 +319,8 @@ public class MainActivity extends ActionBarActivity {                           
                     radioBtnDisc.setClickable(false);
                     radioBtnCont.setClickable(false);
 
+                    mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
+
                 } else {
                     Log.i("Main/Logging listener", "off / not logging");
 
@@ -357,6 +370,12 @@ public class MainActivity extends ActionBarActivity {                           
                                 " Average Speed: " + avgSpeed + " Current filename: " + fileName[0]);
 
                     }
+
+                    if (mWakeLock.isHeld()) {                                                       /*Check if a wakelock is held*/
+                        mWakeLock.release();                                                        /*If it is, release it so it won't drain battery*/
+                        mWakeLock.acquire(120000);                                                  /*Start a new wakelock with a timeout of 2 minutes to ensure that the logfile will be uploaded*/
+                    }
+
                 }
             }
         });
@@ -371,7 +390,7 @@ public class MainActivity extends ActionBarActivity {                           
 
                 public void onClick(View v) {
 
-                    if(!switchLogging.isChecked()){
+                    if (!switchLogging.isChecked()) {
 
                         userId[0] = Media.getId();
                         audioMode[0] = Media.getMode();
