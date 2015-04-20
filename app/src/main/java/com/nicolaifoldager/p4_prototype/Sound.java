@@ -40,6 +40,7 @@ public class Sound extends MainActivity {
     void loadPdPatch() throws Exception {
 
         File dir = getFilesDir();
+
         IoUtils.extractZipResource(getResources().openRawResource(R.raw.pdpatch), dir, true);
         File patchFile = new File(dir, "pdpatch.pd");
         PdBase.openPatch(patchFile.getAbsolutePath());
@@ -47,7 +48,6 @@ public class Sound extends MainActivity {
         floatToPd("Volume", 0.0f);
 
     }
-
 
     /**
      * Sends a float to the PD patch previously loaded in loadPdPatch method
