@@ -1,5 +1,7 @@
 package com.nicolaifoldager.p4_prototype;
 
+import android.content.Context;
+
 import org.puredata.android.io.AudioParameters;
 import org.puredata.android.io.PdAudio;
 import org.puredata.android.utils.PdUiDispatcher;
@@ -28,23 +30,16 @@ public class Sound extends MainActivity {
         dispatcher = new PdUiDispatcher();
         PdBase.setReceiver( dispatcher );
 
-        try {
-//            loadPdPatch();
-        } catch (Exception e) {
-            e.printStackTrace(System.out);
-        }
-
     }
 
     /**
      * Loads the PD patch so the app can communicate with it.
      *
      * @throws IOException
-     */
-    private void loadPdPatch() throws Exception {
+    */
+    void loadPdPatch() throws Exception {
 
         File dir = getFilesDir();
-        System.out.println(dir);
         IoUtils.extractZipResource(getResources().openRawResource(R.raw.pdpatch), dir, true);
         File patchFile = new File(dir, "pdpatch.pd");
         PdBase.openPatch(patchFile.getAbsolutePath());
@@ -53,6 +48,13 @@ public class Sound extends MainActivity {
 
     }
 
+
+    /**
+     * Sends a float to the PD patch previously loaded in loadPdPatch method
+     *
+     * @param receiver  The name of the receiver within the pd patch in a string
+     * @param value     The value to send to the receiver as a float
+     */
     public void floatToPd(String receiver, Float value) {
 
         PdBase.sendFloat(receiver, value);

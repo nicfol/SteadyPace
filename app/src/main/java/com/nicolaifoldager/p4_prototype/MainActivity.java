@@ -41,6 +41,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.puredata.android.io.AudioParameters;
+import org.puredata.android.io.PdAudio;
+import org.puredata.android.utils.PdUiDispatcher;
+import org.puredata.core.PdBase;
+import org.puredata.core.utils.IoUtils;
+
+import java.io.File;
 import java.io.IOException;
 
 //-------------------------------- LIBRARIES ABOVE -----------------------------------------------//
@@ -87,7 +94,6 @@ public class MainActivity extends ActionBarActivity {                           
         final String[] userId = {"0"};
         final String[] fileName = {null};
 
-        final String[] currentFileName = {null};                                                    /*Filename for the logfile.*/
         final String folderName = Environment.getExternalStorageDirectory().toString()+
                 "/Android/data/com.nicolaifoldager.p4_prototype/";                                  /*Specify the path to the file directory we will save to*/
 
@@ -106,11 +112,13 @@ public class MainActivity extends ActionBarActivity {                           
 //---------------------------------------- INIT PD BELOW -----------------------------------------//
 
         //Initializes the PD library and opens an sound output
-
         try {
             sound.init_pd();
+            sound.loadPdPatch();
         } catch (IOException e) {
             e.printStackTrace(System.out);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
 //---------------------------------------- INIT PD ABOVE -----------------------------------------//
@@ -385,19 +393,23 @@ public class MainActivity extends ActionBarActivity {                           
             });
 
 //-------------------------------- FILE CREATION ABOVE -------------------------------------------//
-+
+
         StrictMode.ThreadPolicy policy =
                 new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
     }
 
+    /**
+     * Check is GPS is enabled, if not alert the user and redirect them to the location settings
+     * within Android OS
+     */
     void checkGPS() {
 
         LocationManager manager = (LocationManager) this.getSystemService
                 (Context.LOCATION_SERVICE);                                                         /*Construct a new LocationManager to check the GPS provider*/
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {                             /*Check if the location provider is the GPS*/
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);                 /*Construct a new dialog box*/
-            alertDialogBuilder.setMessage("GPS is disabled, please enable it before continuing.")   /*Sets the message in the dialog box*/
+            alertDialogBuilder.setMessage("GPS is disabled. Please enable it before continuing.")   /*Sets the message in the dialog box*/
                     .setPositiveButton("Location settings",                                         /*Sets the name of the positive button*/
                             new DialogInterface.OnClickListener() {                                 /*Creates the on click listener service*/
                                 public void onClick(DialogInterface dialog, int id) {
