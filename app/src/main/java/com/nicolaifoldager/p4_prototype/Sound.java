@@ -36,7 +36,7 @@ public class Sound extends MainActivity {
      * Loads the PD patch so the app can communicate with it.
      *
      * @throws IOException
-    
+    */
     void loadPdPatch() throws Exception {
 
         File dir = getFilesDir();

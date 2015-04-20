@@ -300,7 +300,10 @@ public class MainActivity extends ActionBarActivity {                           
                     loggingStatus.setTextColor(Color.rgb(0,255,0));                                 /*Set the text color to green in the UI*/
                     loggingStatus.setText("Yes");                                                   /*Change the text to yes in the UI*/
 
-                    //Disable the radio buttons so the user won't accidentally change feedback mode during a session
+                    /*
+                     * Disable the radio buttons so the user won't accidentally change
+                     * feedback mode during a session
+                     */
                     radioBtnNon.setClickable(false);
                     radioBtnDisc.setClickable(false);
                     radioBtnCont.setClickable(false);
@@ -330,14 +333,14 @@ public class MainActivity extends ActionBarActivity {                           
 
                     //Sets the text in the UI as 0.0 cause if either iterations or avgSpeed it divides by zero and returns NaN
                     if(avgSpeed == 0.0) {
-                        final TextView avgSpeedTxt = (TextView) findViewById(R.id.avgSpeed);            /*Construct TextView*/
+                        final TextView avgSpeedTxt = (TextView) findViewById(R.id.avgSpeed);        /*Construct TextView*/
                         avgSpeedTxt.setText("0");                                                   /*Update average speed in UI*/
                     } else {
-                        final TextView avgSpeedTxt = (TextView) findViewById(R.id.avgSpeed);            /*Construct TextView*/
+                        final TextView avgSpeedTxt = (TextView) findViewById(R.id.avgSpeed);        /*Construct TextView*/
                         avgSpeedTxt.setText(String.valueOf(avgSpeed));                              /*Update average speed in UI*/
                     }
 
-                    Media.uploadFTP(fileName[0]);                                                   /*Upload the logfile to a FTP server.*/
+                    new uploadFiles().execute(fileName[0], fileName[0]);                            /*Executes an asynchronized task to upload the log file*/
 
                     /*
                      * Reset average speed % iteration counter to 0 if they're not.
@@ -348,7 +351,8 @@ public class MainActivity extends ActionBarActivity {                           
                         avgSpeed = 0.0;
                         iterations[0] = 1.0;
                         fileName[0] = null;
-                        Log.i("Main/Logging listener", "Variables reset: avgSpeed, iterations & currentFileName");
+                        Log.i("Main/Logging listener", "Variables reset: avgSpeed, " +
+                                "iterations & currentFileName");
                         Log.i("Main/Logging listener", "Iterations: " + iterations[0] +
                                 " Average Speed: " + avgSpeed + " Current filename: " + fileName[0]);
 
@@ -375,8 +379,8 @@ public class MainActivity extends ActionBarActivity {                           
                         fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" +
                                 String.valueOf(System.currentTimeMillis() + ".txt");
 
-                        Media.createFile(folderName, fileName[0]);                           /*Creates a new file with the name of fileName[0] and location of folderName*/
-                        Logging.startWriter(folderName, fileName[0]);                        /*Starts a writer to the file in folderName/fileName[0]*/
+                        Media.createFile(folderName, fileName[0]);                                  /*Creates a new file with the name of fileName[0] and location of folderName*/
+                        Logging.startWriter(folderName, fileName[0]);                               /*Starts a writer to the file in folderName/fileName[0]*/
                     } else {
                         String toastMsg = "Please stop logging before starting a new session";
                         Toast.makeText(getApplicationContext(), toastMsg,
@@ -390,9 +394,6 @@ public class MainActivity extends ActionBarActivity {                           
 
 //-------------------------------- FILE CREATION ABOVE -------------------------------------------//
 
-        StrictMode.ThreadPolicy policy =
-                new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
     }
 
     /**
@@ -459,7 +460,7 @@ public class MainActivity extends ActionBarActivity {                           
 
         Log.i("MainActiviy/loadPdPatch", "Patch loaded");
 
-        floatToPd("osc_volume", 0.3f);
+        floatToPd("osc_volume", 0.0f);
 
         floatToPd("osc_pitch", 614.0f);
 
