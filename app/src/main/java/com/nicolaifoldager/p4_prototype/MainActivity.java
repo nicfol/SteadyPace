@@ -35,6 +35,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -86,6 +87,9 @@ public class MainActivity extends ActionBarActivity {                           
         //Call the elements in the UI for onClickListeners
         final Switch switchLogging = (Switch) findViewById(R.id.switchStartLogging);                /*Logging Switch*/
         final Button createFileBtn = (Button) findViewById(R.id.createFile);                        /*Create new file button*/
+
+        final RadioButton rBtnNoSound = (RadioButton) findViewById(R.id.rBtnNoSound);
+        final RadioButton rBtnSound = (RadioButton) findViewById(R.id.rBtnSound);
 
         /**
          * The variables are set as zero-index arrays so we can manipulate them despite them being
@@ -250,7 +254,11 @@ public class MainActivity extends ActionBarActivity {                           
                             Toast.LENGTH_LONG).show();
 
                     switchLogging.toggle();                                                         /*Toggles the switch back to off state*/
+                } else if (!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {                                                           /*Checks if a file has been created, if not then it'll toast an error*/
+                    Toast.makeText(getApplicationContext(), "Please select an audio mode",
+                            Toast.LENGTH_LONG).show();
 
+                    switchLogging.toggle();
                 } else if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     checkGPS();
                     switchLogging.toggle();
@@ -261,20 +269,16 @@ public class MainActivity extends ActionBarActivity {                           
                     loggingStatus.setText("Yes");                                                   /*Change the text to yes in the UI*/
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
-
                 } else {
                     Log.i("Main/Logging listener", "off / not logging");
 
                     loggingStatus.setTextColor(Color.rgb(255,0,0));                                 /*Set the text color to red in the UI*/
                     loggingStatus.setText("No");                                                    /*Set the text to no in the UI*/
 
-                    double loggedTime = minUpdateTime/1000 * iterations[0];                         /*Estimates the time logging in milliseconds. Should take delta of start unix and end unix*/
                     double avgSpeed = totalSpeed[0] / iterations[0];                                /*Divide total speed with the iteration counter to get average speed*/
 
                     try {
-                        String endMsg = "\n\t\t\t\t\t\t" + iterations[0] + "\n\t\t\t\t\t\t" +
-                                avgSpeed + "\n\t\t\t\t\t\t" + loggedTime;
-
+                        String endMsg = "";
                         logWriter.stopWriter(endMsg);                                               /*Writes endMsg to the FileWriter and closes the FileWriter*/
                     } catch (IOException e) {
                         e.printStackTrace(System.out);

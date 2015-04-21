@@ -99,8 +99,11 @@ public class Media {
             try {
                 logging.write(deviceIdInt + "\n");                                                  /*Writes the device ID to the prefs.txt*/
 
-                //If the deviceID is an even number it saves continuous audio feedback in the prefs.txt
-                //if it's uneven it'll save discrete audio feedback.
+                /*
+                 * If the deviceID is an even number it saves continuous audio
+                 * feedback in the prefs.txt if it's uneven it'll save
+                 * discrete audio feedback.
+                */
                 if (deviceIdInt % 2 == 0) {
                     logging.write("cont");
                     modeGlobal[0] = "cont";
@@ -141,7 +144,8 @@ public class Media {
      * @param filename  filename that is going to be uploaded in string without directory but with
      *                  file extension.
      */
-    static void uploadFTP(String filename) {
+    static boolean uploadFTP(String filename) {
+        boolean result = false;
         try {
             FTPClient ftpConnection = new FTPClient();                                              /*Construct an FTPClient from the Apache commons library*/
             ftpConnection.connect("31.170.160.101");                                                /*Host for the FTP*/
@@ -154,16 +158,22 @@ public class Media {
 
             FileInputStream in = new FileInputStream(new File(data));                               /*Start a new inputStream from the file we want uploaded so we can read from it to the FTP*/
             ftpConnection.changeWorkingDirectory("/public_html/logs/");                             /*Change the directory the file will be uploaded to on the FTP server*/
-            boolean result = ftpConnection.storeFile(filename, in);                                 /*Print the result of the file upload*/
+            result = ftpConnection.storeFile(filename, in);                                         /*Print the result of the file upload*/
             in.close();                                                                             /*Closes the filestream*/
-
-            if (result) { Log.v("Media/uploadFTP", "Upload result: succeeded"); }                   /*Prints the result of the file upload*/
 
             ftpConnection.logout();                                                                 /*Logs out of the session at the FTP server*/
             ftpConnection.disconnect();                                                             /*Disconnects from the FTP server*/
 
         } catch (Exception e) {
             e.printStackTrace(System.out);
+        }
+
+        if (result) {
+            Log.i("Media/uploadFTP", "Upload result: succeeded");                                   /*Prints the result of the file upload*/
+            return true;
+        } else {
+            Log.i("Media/uploadFTP", "Upload result: failed");                                      /*Prints the result of the file upload*/
+            return false;
         }
     }
 
