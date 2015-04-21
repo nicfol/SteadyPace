@@ -195,18 +195,17 @@ public class MainActivity extends ActionBarActivity {                           
                         e.printStackTrace(System.out);
                     }
 
-                        if(audioMode.equals("cont")) {
-                            //Cont sound
-                        } else if (audioMode.equals("disc")) {
-                            //Discrete sound
-                        } else {
-                            //No sound
-                        }
-
+                    if(audioMode.equals("cont")) {
+                        //Cont sound
+                        Log.i("--------------------","1 cont");
+                    } else if (audioMode.equals("disc")) {
+                        //Discrete sound
+                        Log.i("--------------------","2 disc");
                     } else {
-                        switchLogging.setChecked(false);
-                        String toastMsg = "Please pick an audio mode!";
-                        Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
+                        //No sound
+                        Log.i("--------------------","3 no sound");
+                    }
+
                     }//If switchLogging is checked
             }//onLocationChanged
 
@@ -278,13 +277,14 @@ public class MainActivity extends ActionBarActivity {                           
                     double avgSpeed = totalSpeed[0] / iterations[0];                                /*Divide total speed with the iteration counter to get average speed*/
 
                     try {
-                        String endMsg = "";
-                        logWriter.stopWriter(endMsg);                                               /*Writes endMsg to the FileWriter and closes the FileWriter*/
+                        logWriter.stopWriter("");                                                   /*Stops the filewriter*/
                     } catch (IOException e) {
                         e.printStackTrace(System.out);
                     }
 
                     new uploadFiles().execute(fileName[0], fileName[0]);                            /*Executes an asynchronized task to upload the log file*/
+
+
 
                     /*
                      * Reset average speed % iteration counter to 0 if they're not.

@@ -144,8 +144,7 @@ public class Media {
      * @param filename  filename that is going to be uploaded in string without directory but with
      *                  file extension.
      */
-    static boolean uploadFTP(String filename) {
-        boolean result = false;
+    static void uploadFTP(final String filename) {
         try {
             FTPClient ftpConnection = new FTPClient();                                              /*Construct an FTPClient from the Apache commons library*/
             ftpConnection.connect("31.170.160.101");                                                /*Host for the FTP*/
@@ -158,23 +157,23 @@ public class Media {
 
             FileInputStream in = new FileInputStream(new File(data));                               /*Start a new inputStream from the file we want uploaded so we can read from it to the FTP*/
             ftpConnection.changeWorkingDirectory("/public_html/logs/");                             /*Change the directory the file will be uploaded to on the FTP server*/
-            result = ftpConnection.storeFile(filename, in);                                         /*Print the result of the file upload*/
+            boolean result = ftpConnection.storeFile(filename, in);                                 /*Print the result of the file upload*/
             in.close();                                                                             /*Closes the filestream*/
 
             ftpConnection.logout();                                                                 /*Logs out of the session at the FTP server*/
             ftpConnection.disconnect();                                                             /*Disconnects from the FTP server*/
 
+            if (result) {
+                Log.i("Media/uploadFTP", "Upload result: succeeded");                               /*Prints the result of the file upload*/
+            } else {
+                Log.i("Media/uploadFTP", "Upload result: failed");                                  /*Prints the result of the file upload*/
+            }
+
         } catch (Exception e) {
+            new uploadFiles().execute(filename, filename);
             e.printStackTrace(System.out);
         }
 
-        if (result) {
-            Log.i("Media/uploadFTP", "Upload result: succeeded");                                   /*Prints the result of the file upload*/
-            return true;
-        } else {
-            Log.i("Media/uploadFTP", "Upload result: failed");                                      /*Prints the result of the file upload*/
-            return false;
-        }
     }
 
     /**
