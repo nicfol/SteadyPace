@@ -162,17 +162,6 @@ public class MainActivity extends ActionBarActivity {                           
 //--------------------------------------- INIT ABOVE ---------------------------------------------//
 
 
-//------------------------------------ RADIO BUTTONS BELOW ---------------------------------------//
-
-        final RadioButton radioBtnNon = (RadioButton) findViewById(R.id.radioButtonNon);
-        final RadioButton radioBtnDisc = (RadioButton) findViewById(R.id.radioButtonDisc);
-        final RadioButton radioBtnCont = (RadioButton) findViewById(R.id.radioButtonCont);
-
-        radioBtnNon.setChecked(true);
-
-//-------------------------------- RADIO BUTTONS ABOVE -------------------------------------------//
-
-
 //-------------------------------- LOCATION LISTENER BELOW ---------------------------------------//
 
         //Construct a listener that checks for changes in the location service in Android

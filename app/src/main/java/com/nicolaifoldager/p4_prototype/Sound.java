@@ -1,6 +1,5 @@
 package com.nicolaifoldager.p4_prototype;
 
-import android.content.Context;
 
 import org.puredata.android.io.AudioParameters;
 import org.puredata.android.io.PdAudio;
