@@ -35,7 +35,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -85,7 +84,6 @@ public class MainActivity extends ActionBarActivity {                           
 //-------------------------------- VARIABLES & CONSTRUCTORS BELOW --------------------------------//
 
         //Call the elements in the UI for onClickListeners
-        final Switch switchLock = (Switch) findViewById(R.id.switchLock);                           /*Lock Switch*/
         final Switch switchLogging = (Switch) findViewById(R.id.switchStartLogging);                /*Logging Switch*/
         final Button createFileBtn = (Button) findViewById(R.id.createFile);                        /*Create new file button*/
 
@@ -114,7 +112,6 @@ public class MainActivity extends ActionBarActivity {                           
         //Construct classes - Why global? Cause garbage collection <3
         final Media media = new Media();
         final Logging logWriter = new Logging();
-        final Sound sound = new Sound();
 
 //-------------------------------- VARIABLES & CONSTRUCTORS ABOVE --------------------------------//
 
@@ -171,9 +168,6 @@ public class MainActivity extends ActionBarActivity {                           
 
                 float accuracy = location.getAccuracy();                                            /*Get the current accuracy from the location manager in meters*/
 
-                final TextView gpsAccuracy = (TextView) findViewById(R.id.gpsAccuracy);             /*Construct TextView*/
-                gpsAccuracy.setText(String.valueOf(accuracy));                                      /*Update the UI to show the current accuracy*/
-
                 float speedMPS = location.getSpeed();                                               /*Get the current speed from the location manager in m/s*/
                 float speedKPH = 3.6f * speedMPS;                                                   /*Convert to KPH. 3.6 because that's what you need to go from m/s to km/h*/
 
@@ -184,35 +178,32 @@ public class MainActivity extends ActionBarActivity {                           
                 double getLat = location.getLatitude();                                             /*Gets the latitude from the location manager*/
 
                 if(switchLogging.isChecked()) {
-                    if (radioBtnNon.isChecked() || radioBtnDisc.isChecked() ||
-                            radioBtnCont.isChecked()) {
+                    try {
+                        String msg = iterations[0] + "\t" + speedKPH + "\t" + accuracy + "\t\t"
+                                + iterations[0] + "," + getLat + "," + getLon + "\n";
+                        logWriter.write(msg);                                                   /*Write the string endMsg to the FileWriter*/
+                        totalSpeed[0] += speedKPH;                                              /*Add the current speed to total speed*/
+                        iterations[0] += 1;                                                     /*Add 1 to the iteration counter*/
+                    } catch (IOException e) {
+                        String toastMsg = e.getMessage();
+                        Toast.makeText(getApplicationContext(), toastMsg,
+                                Toast.LENGTH_LONG).show();
+                        e.printStackTrace(System.out);
+                    }
 
-                        try {
-                            String msg = iterations[0] + "\t" + speedKPH + "\t" + accuracy + "\t\t"
-                                    + iterations[0] + "," + getLat + "," + getLon + "\n";
-                            logWriter.write(msg);                                                   /*Write the string endMsg to the FileWriter*/
-                            totalSpeed[0] += speedKPH;                                              /*Add the current speed to total speed*/
-                            iterations[0] += 1;                                                     /*Add 1 to the iteration counter*/
-                        } catch (IOException e) {
-                            String toastMsg = e.getMessage();
-                            Toast.makeText(getApplicationContext(), toastMsg,
-                                    Toast.LENGTH_LONG).show();
-                            e.printStackTrace(System.out);
-                        }
-
-                        if (radioBtnDisc.isChecked()) {
-
-
-                        } else if (radioBtnCont.isChecked()) {
-
+                        if(audioMode.equals("cont")) {
+                            //Cont sound
+                        } else if (audioMode.equals("disc")) {
+                            //Discrete sound
+                        } else {
+                            //No sound
                         }
 
                     } else {
                         switchLogging.setChecked(false);
                         String toastMsg = "Please pick an audio mode!";
                         Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
-                    }
-                }//If switchLogging is checked
+                    }//If switchLogging is checked
             }//onLocationChanged
 
             @Override
@@ -246,37 +237,6 @@ public class MainActivity extends ActionBarActivity {                           
 //-------------------------------- LOCATION LISTENER ABOVE ---------------------------------------//
 
 
-//-------------------------------- LOCK SWITCH CONTROL BELOW -------------------------------------//
-
-        //Lock switch
-        switchLock.setOnClickListener(new View.OnClickListener() {                                  /*Create a listener service that checks if the switch that locks is clicked on*/
-            public void onClick(View v) {
-
-                if (switchLock.isChecked()) {                                                       /*If the switch is already checked then run the scope*/
-                    //Switch controlling logging
-                    switchLogging.setClickable(false);                                              /*Disable the switch that controls the logging*/
-                    switchLogging.setAlpha(0.4f);                                                   /*Set it to 50% alpha in the UI*/
-
-                    //Button creating a new file
-                    createFileBtn.setClickable(false);                                              /*Disable the button that creates a new file to log to*/
-                    createFileBtn.setAlpha(0.4f);                                                   /*Set it to 50% alpha in the UI*/
-
-                } else {
-                    //Switch controlling logging
-                    switchLogging.setClickable(true);                                               /*Enables the switch that controls the logging*/
-                    switchLogging.setAlpha(1.0f);                                                   /*Sets the alpha of the switch to 100% in the ui*/
-
-                    //Button creating a new file
-                    createFileBtn.setClickable(true);                                               /*Enables the button that controls the logging*/
-                    switchLogging.setAlpha(1.0f);                                                   /*Sets the alpha of the switch to 100% in the ui*/
-
-                }
-            }
-        });
-
-//-------------------------------- LOCK SWITCH CONTROL ABOVE -------------------------------------//
-
-
 //-------------------------------- LOGGING  SWITCH BELOW -----------------------------------------//
 
         //Logging switch
@@ -300,14 +260,6 @@ public class MainActivity extends ActionBarActivity {                           
                     loggingStatus.setTextColor(Color.rgb(0,255,0));                                 /*Set the text color to green in the UI*/
                     loggingStatus.setText("Yes");                                                   /*Change the text to yes in the UI*/
 
-                    /*
-                     * Disable the radio buttons so the user won't accidentally change
-                     * feedback mode during a session
-                     */
-                    radioBtnNon.setClickable(false);
-                    radioBtnDisc.setClickable(false);
-                    radioBtnCont.setClickable(false);
-
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
 
                 } else {
@@ -315,11 +267,6 @@ public class MainActivity extends ActionBarActivity {                           
 
                     loggingStatus.setTextColor(Color.rgb(255,0,0));                                 /*Set the text color to red in the UI*/
                     loggingStatus.setText("No");                                                    /*Set the text to no in the UI*/
-
-                    //Enables the radio buttons after the session has ended
-                    radioBtnNon.setClickable(true);
-                    radioBtnDisc.setClickable(true);
-                    radioBtnCont.setClickable(true);
 
                     double loggedTime = minUpdateTime/1000 * iterations[0];                         /*Estimates the time logging in milliseconds. Should take delta of start unix and end unix*/
                     double avgSpeed = totalSpeed[0] / iterations[0];                                /*Divide total speed with the iteration counter to get average speed*/
@@ -331,15 +278,6 @@ public class MainActivity extends ActionBarActivity {                           
                         logWriter.stopWriter(endMsg);                                               /*Writes endMsg to the FileWriter and closes the FileWriter*/
                     } catch (IOException e) {
                         e.printStackTrace(System.out);
-                    }
-
-                    //Sets the text in the UI as 0.0 cause if either iterations or avgSpeed it divides by zero and returns NaN
-                    if(avgSpeed == 0.0) {
-                        final TextView avgSpeedTxt = (TextView) findViewById(R.id.avgSpeed);        /*Construct TextView*/
-                        avgSpeedTxt.setText("0");                                                   /*Update average speed in UI*/
-                    } else {
-                        final TextView avgSpeedTxt = (TextView) findViewById(R.id.avgSpeed);        /*Construct TextView*/
-                        avgSpeedTxt.setText(String.valueOf(avgSpeed));                              /*Update average speed in UI*/
                     }
 
                     new uploadFiles().execute(fileName[0], fileName[0]);                            /*Executes an asynchronized task to upload the log file*/

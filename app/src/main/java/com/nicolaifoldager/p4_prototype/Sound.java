@@ -19,7 +19,7 @@ public class Sound extends MainActivity {
      *
      * @throws IOException
      */
-    public void init_pd() throws IOException {
+    public void DNU_init_pd() throws IOException {
 
         // Configure the audio glue
         int sampleRate = AudioParameters.suggestSampleRate();
@@ -36,7 +36,7 @@ public class Sound extends MainActivity {
      *
      * @throws IOException
     */
-    void loadPdPatch() throws Exception {
+    void DNU_loadPdPatch() throws Exception {
 
         File dir = getFilesDir();
 
@@ -54,21 +54,9 @@ public class Sound extends MainActivity {
      * @param receiver  The name of the receiver within the pd patch in a string
      * @param value     The value to send to the receiver as a float
      */
-    public void floatToPd(String receiver, Float value) {
+    public void DNU_floatToPd(String receiver, Float value) {
 
         PdBase.sendFloat(receiver, value);
-
-    }
-
-    public void DiscSound() {
-
-        //---
-
-    }
-
-    public void ContSound() {
-
-        //---
 
     }
 
