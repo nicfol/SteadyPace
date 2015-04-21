@@ -28,6 +28,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
@@ -56,8 +57,9 @@ import java.io.IOException;
 
 public class MainActivity extends ActionBarActivity {                                               /*Extends this ActionBarActivity into our MainActivity. This shows the black bar in the top*/
 
-    //Wakelocks
-    PowerManager.WakeLock mWakeLock = null;
+    private AsyncTask uploadFiles;                                                                  /*AsyncTask for file upload on another thread*/
+    private PdUiDispatcher dispatcher;                                                              /*PD dispatcher for audio control*/
+    PowerManager.WakeLock mWakeLock = null;                                                         /*Wakelock to keep the cpu running while screen is off during a session*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {                                            /*Runs when the activity is created*/
@@ -102,9 +104,9 @@ public class MainActivity extends ActionBarActivity {                           
         final double[] totalSpeed = {0.0};                                                          /*Total speed, used to calc average speed*/
         final double[] iterations = {1.0};                                                          /*How many times the location manager have updated the speed (How many entries we have in the log file)*/
 
-        final String[] audioMode = {null};
-        final String[] userId = {"0"};
-        final String[] fileName = {null};
+        final String[] audioMode = {null};                                                          /*Stores the audioMode*/
+        final String[] userId = {"0"};                                                              /*Stores the userID*/
+        final String[] fileName = {null};                                                           /*Saves the filename*/
 
         final String folderName = Environment.getExternalStorageDirectory().toString()+
                 "/Android/data/com.nicolaifoldager.p4_prototype/";                                  /*Specify the path to the file directory we will save to*/
@@ -147,11 +149,11 @@ public class MainActivity extends ActionBarActivity {                           
                 e.printStackTrace(System.out);
             }
 
-            userId[0] = Media.getId();
-            audioMode[0] = Media.getMode();
+            userId[0] = Media.getId();                                                              /*Gets the ID from the Media class that reads prefs.txt*/
+            audioMode[0] = Media.getMode();                                                         /*Gets the audio mode from the Media class that reads prefs.txt*/
 
             fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" +
-                    String.valueOf(System.currentTimeMillis()) + ".txt";
+                    String.valueOf(System.currentTimeMillis()) + ".txt";                            /*Stores the filename for the current session in a string.*/
 
         } else {
             String toastMsg = "Read/write access not granted. Folder has not been created!";
@@ -253,7 +255,7 @@ public class MainActivity extends ActionBarActivity {                           
                             Toast.LENGTH_LONG).show();
 
                     switchLogging.toggle();                                                         /*Toggles the switch back to off state*/
-                } else if (!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {                                                           /*Checks if a file has been created, if not then it'll toast an error*/
+                } else if (!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {                    /*Checks if a file has been created, if not then it'll toast an error*/
                     Toast.makeText(getApplicationContext(), "Please select an audio mode",
                             Toast.LENGTH_LONG).show();
 
@@ -262,13 +264,15 @@ public class MainActivity extends ActionBarActivity {                           
                     checkGPS();
                     switchLogging.toggle();
                 } else if (switchLogging.isChecked()) {                                             /*If the switch is already checked then run the scope*/
+                    startAudio();                                                                   /*Starts the audio feedback*/
                     Log.i("Main/Logging listener", "on / logging");
 
-                    loggingStatus.setTextColor(Color.rgb(0,255,0));                                 /*Set the text color to green in the UI*/
+                    loggingStatus.setTextColor(Color.rgb(0, 255, 0));                               /*Set the text color to green in the UI*/
                     loggingStatus.setText("Yes");                                                   /*Change the text to yes in the UI*/
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
                 } else {
+                    stopAudio();                                                                    /*Stops the audio feedback*/
                     Log.i("Main/Logging listener", "off / not logging");
 
                     loggingStatus.setTextColor(Color.rgb(255,0,0));                                 /*Set the text color to red in the UI*/
@@ -282,9 +286,8 @@ public class MainActivity extends ActionBarActivity {                           
                         e.printStackTrace(System.out);
                     }
 
-                    new uploadFiles().execute(fileName[0], fileName[0]);                            /*Executes an asynchronized task to upload the log file*/
-
-
+                    showUploadDialog();                                                             /*Shows a dialog that the application is trying to upload*/
+                    uploadFiles = new uploadFiles().execute(fileName[0]);                           /*Start the upload*/
 
                     /*
                      * Reset average speed % iteration counter to 0 if they're not.
@@ -318,7 +321,6 @@ public class MainActivity extends ActionBarActivity {                           
 
             createFileBtn.setOnClickListener(new View.OnClickListener() {                           /*Create a listener service that checks if the button that creates a new file has been pressed*/
                 @Override
-
                 public void onClick(View v) {
 
                     if (!switchLogging.isChecked()) {
@@ -339,11 +341,24 @@ public class MainActivity extends ActionBarActivity {                           
 
                 }
 
-
             });
 
 //-------------------------------- FILE CREATION ABOVE -------------------------------------------//
 
+    }
+
+    public void showUploadDialog() {
+        AlertDialog.Builder alertDialogUpload = new AlertDialog.Builder(this);                      /*Construct a new dialog box*/
+        alertDialogUpload.setMessage("Uploading file")                                              /*Sets the message in the dialog box*/
+                .setNegativeButton("Cancel",                                                        /*Sets the name of the negative button*/
+                        new DialogInterface.OnClickListener() {                                     /*Creates the on click listener service*/
+                            public void onClick(DialogInterface dialog, int id) {
+                                uploadFiles.cancel(true);
+                                dialog.cancel();                                                    /*Cancels the dialog box*/
+                            }
+                        });
+        AlertDialog alert = alertDialogUpload.create();                                             /*Constructs the dialog*/
+        alert.show();                                                                               /*Shows the dialog box*/
     }
 
     /**
@@ -375,8 +390,6 @@ public class MainActivity extends ActionBarActivity {                           
             alert.show();                                                                           /*Shows the dialog box*/
         }
     }
-
-    private PdUiDispatcher dispatcher;
 
     /**
      * Initializes PD Library and prepares the audio outlet.
@@ -444,5 +457,6 @@ public class MainActivity extends ActionBarActivity {                           
 
         PdAudio.stopAudio();
     }
+
 
 } //MainActivity

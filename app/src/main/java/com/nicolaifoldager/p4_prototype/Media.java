@@ -139,16 +139,17 @@ public class Media {
     }
 
     /**
-     * Upload a file to an FTP server.
+     * Upload a file to a FTP server.
      *
      * @param filename  filename that is going to be uploaded in string without directory but with
      *                  file extension.
      */
-    static void uploadFTP(final String filename) {
+    static String uploadFTP(final String filename) {
+
         try {
             FTPClient ftpConnection = new FTPClient();                                              /*Construct an FTPClient from the Apache commons library*/
             ftpConnection.connect("31.170.160.101");                                                /*Host for the FTP*/
-            ftpConnection.login("a2212160", "fisk123");                                             /*Username and password*/
+            ftpConnection.login("a2212160", "fisk123");                                             /*Username and code ord*/
 
             ftpConnection.enterLocalPassiveMode();                                                  /*Use passive mode to connect to the FTP (Connect through port 21)*/
             ftpConnection.setFileType(FTP.BINARY_FILE_TYPE);                                        /*Set the transfer type to binary, meaning we convert everything to binary before uploading*/
@@ -163,15 +164,13 @@ public class Media {
             ftpConnection.logout();                                                                 /*Logs out of the session at the FTP server*/
             ftpConnection.disconnect();                                                             /*Disconnects from the FTP server*/
 
-            if (result) {
-                Log.i("Media/uploadFTP", "Upload result: succeeded");                               /*Prints the result of the file upload*/
-            } else {
-                Log.i("Media/uploadFTP", "Upload result: failed");                                  /*Prints the result of the file upload*/
-            }
+            Log.i("Media/uploadFTP","Log file uploaded: " + result);                                /*Prints the result of the file upload*/
 
+            return null;
         } catch (Exception e) {
             new uploadFiles().execute(filename, filename);
             e.printStackTrace(System.out);
+            return null;
         }
 
     }
