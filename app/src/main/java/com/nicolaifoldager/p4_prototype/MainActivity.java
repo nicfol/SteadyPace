@@ -34,8 +34,10 @@ import android.os.Environment;
 import android.os.PowerManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -93,6 +95,10 @@ public class MainActivity extends ActionBarActivity {                           
         final RadioButton rBtnNoSound = (RadioButton) findViewById(R.id.rBtnNoSound);
         final RadioButton rBtnSound = (RadioButton) findViewById(R.id.rBtnSound);
 
+        final EditText stepLengthTxt = (EditText) findViewById(R.id.stepLengthField);
+        stepLengthTxt.setGravity(Gravity.CENTER);
+        final Button setStepLength = (Button) findViewById(R.id.setStepLength);
+
         /**
          * The variables are set as zero-index arrays so we can manipulate them despite them being
          * declared as final.
@@ -107,6 +113,7 @@ public class MainActivity extends ActionBarActivity {                           
         final String[] audioMode = {null};                                                          /*Stores the audioMode*/
         final String[] userId = {"0"};                                                              /*Stores the userID*/
         final String[] fileName = {null};                                                           /*Saves the filename*/
+        final double[] stepLength = {0};
 
         final String folderName = Environment.getExternalStorageDirectory().toString()+
                 "/Android/data/com.nicolaifoldager.p4_prototype/";                                  /*Specify the path to the file directory we will save to*/
@@ -316,6 +323,28 @@ public class MainActivity extends ActionBarActivity {                           
         });
 
 //-------------------------------- END LOGGING ABOVE ---------------------------------------------//
+
+
+//-------------------------------- SET STEP LENGTH BELOW -----------------------------------------//
+
+        setStepLength.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                try {
+                    stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());
+                    System.out.println("----------------------------------------" + stepLength[0]);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(getApplicationContext(), "Wrong format, please only use " +
+                                    "and specify the length in meters.",
+                            Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+            }
+        });
+
+//-------------------------------- SET STEP LENGTH ABOVE -----------------------------------------//
 
 
 //-------------------------------- FILE CREATION BELOW -------------------------------------------//

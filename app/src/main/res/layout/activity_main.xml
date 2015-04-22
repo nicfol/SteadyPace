@@ -100,7 +100,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtCurrentSpeed"
-        android:layout_marginLeft="22dp" >
+        android:layout_marginLeft="22dp"
+        android:id="@+id/radioGroup">
 
         <RadioButton
             android:layout_width="wrap_content"
@@ -124,6 +125,27 @@
             android:fontFamily="sans-serif-thin"  />
     </RadioGroup>
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/stepLengthField"
+        android:layout_below="@+id/radioGroup"
+        android:layout_centerHorizontal="true"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set step length"
+        android:id="@+id/setStepLength"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-thin" />
+
    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -143,5 +165,4 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="22dp"
         android:fontFamily="sans-serif-thin" />
-
 </RelativeLayout>

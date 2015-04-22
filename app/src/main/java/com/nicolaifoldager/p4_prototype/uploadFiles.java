@@ -1,7 +1,6 @@
 package com.nicolaifoldager.p4_prototype;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class uploadFiles extends AsyncTask<String, String, String> {
 
@@ -10,7 +9,6 @@ public class uploadFiles extends AsyncTask<String, String, String> {
     @Override
     protected void onCancelled() {
         running = false;
-        Log.e("----------------------", " " + running);
         super.onCancelled();
     }
 
