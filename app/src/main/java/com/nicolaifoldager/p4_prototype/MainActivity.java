@@ -301,7 +301,8 @@ public class MainActivity extends ActionBarActivity {                           
                         Log.i("Main/Logging listener", "Variables reset: avgSpeed, " +
                                 "iterations & currentFileName");
                         Log.i("Main/Logging listener", "Iterations: " + iterations[0] +
-                                " Average Speed: " + avgSpeed + " Current filename: " + fileName[0]);
+                                " Average Speed: " + avgSpeed + " Current filename: "
+                                + fileName[0]);
 
                     }
 
@@ -347,6 +348,9 @@ public class MainActivity extends ActionBarActivity {                           
 
     }
 
+     /**
+     * Shows the dialog that tells the user, that the upload is doing stuff
+     */
     public void showUploadDialog() {
         AlertDialog.Builder alertDialogUpload = new AlertDialog.Builder(this);                      /*Construct a new dialog box*/
         alertDialogUpload.setMessage("Uploading file")                                              /*Sets the message in the dialog box*/
