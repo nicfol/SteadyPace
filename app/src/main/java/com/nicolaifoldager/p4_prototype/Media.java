@@ -168,7 +168,7 @@ public class Media {
 
             return null;
         } catch (Exception e) {
-            new uploadFiles().execute(filename, filename);
+            //new uploadFiles().execute(filename, filename);
             e.printStackTrace(System.out);
             return null;
         }

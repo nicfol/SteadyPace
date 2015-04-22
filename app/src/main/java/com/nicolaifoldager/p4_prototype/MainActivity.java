@@ -80,8 +80,9 @@ public class MainActivity extends ActionBarActivity {                           
 
 //------------------------------------ WAKELOCK BELOW --------------------------------------------//
 
-        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, MainActivity.class.getSimpleName());
+        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);             /*Construct a new PowerManager to call from the power service within Android OS*/
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                MainActivity.class.getSimpleName());                                                /*Construct a new partial wakelock to keep the CPU running when the screen is of*/
 
 //------------------------------------ WAKELOCK ABOVE --------------------------------------------//
 
@@ -92,12 +93,11 @@ public class MainActivity extends ActionBarActivity {                           
         final Switch switchLogging = (Switch) findViewById(R.id.switchStartLogging);                /*Logging Switch*/
         final Button createFileBtn = (Button) findViewById(R.id.createFile);                        /*Create new file button*/
 
-        final RadioButton rBtnNoSound = (RadioButton) findViewById(R.id.rBtnNoSound);
-        final RadioButton rBtnSound = (RadioButton) findViewById(R.id.rBtnSound);
+        final RadioButton rBtnNoSound = (RadioButton) findViewById(R.id.rBtnNoSound);               /*Radiobutton for no sound audio mode*/
+        final RadioButton rBtnSound = (RadioButton) findViewById(R.id.rBtnSound);                   /*Radiobutton for sound audio mode*/
 
-        final EditText stepLengthTxt = (EditText) findViewById(R.id.stepLengthField);
-        stepLengthTxt.setGravity(Gravity.CENTER);
-        final Button setStepLength = (Button) findViewById(R.id.setStepLength);
+        final EditText stepLengthTxt = (EditText) findViewById(R.id.stepLengthField);               /*Textfield to input steplength into*/
+        stepLengthTxt.setGravity(Gravity.CENTER);                                                   /*Center it cause sparkles*/
 
         /**
          * The variables are set as zero-index arrays so we can manipulate them despite them being
@@ -118,9 +118,9 @@ public class MainActivity extends ActionBarActivity {                           
         final String folderName = Environment.getExternalStorageDirectory().toString()+
                 "/Android/data/com.nicolaifoldager.p4_prototype/";                                  /*Specify the path to the file directory we will save to*/
 
-        //Construction a LocationManager to call for the location_service in android
+
         final LocationManager locationManager = (LocationManager) this.getSystemService
-                (Context.LOCATION_SERVICE);
+                (Context.LOCATION_SERVICE);                                                         /*Construction a LocationManager to call for the location_service in android*/
 
         //Construct classes - Why global? Cause garbage collection <3
         final Media media = new Media();
@@ -163,8 +163,8 @@ public class MainActivity extends ActionBarActivity {                           
                     String.valueOf(System.currentTimeMillis()) + ".txt";                            /*Stores the filename for the current session in a string.*/
 
         } else {
-            String toastMsg = "Read/write access not granted. Folder has not been created!";
-            Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Read/write access not granted. Folder has " +
+                    "not been created!", Toast.LENGTH_LONG).show();
         }
 
         checkGPS();                                                                                 /*Runs the method to check if GPS is enabled*/
@@ -240,11 +240,10 @@ public class MainActivity extends ActionBarActivity {                           
             }
         };
 
-        //Request new location update every minUpdateTime millisecond & minUpdateLocation meters.
         final int minUpdateTime = 1000;                                                             /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
         final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
-                minUpdateLocation, locationListener);
+                minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
 
 //-------------------------------- LOCATION LISTENER ABOVE ---------------------------------------//
 
@@ -287,7 +286,7 @@ public class MainActivity extends ActionBarActivity {                           
 
                     double avgSpeed = totalSpeed[0] / iterations[0];                                /*Divide total speed with the iteration counter to get average speed in KPH*/
 
-                    //TODO calculate distance based on average speed (kph) and steplength (meters)
+                    //TODO calculate distance based on average speed (kph) and step length (meters)
                     double distance = avgSpeed * stepLength[0];
 
                     try {
@@ -315,7 +314,7 @@ public class MainActivity extends ActionBarActivity {                           
                     }
 
                     if (mWakeLock.isHeld()) {                                                       /*Check if a wakelock is held*/
-                        mWakeLock.release();                                                        /*If it is, release it so it won't drain battery*/
+                        mWakeLock.release();                                                        /*Release it so it won't drain battery*/
                         mWakeLock.acquire(120000);                                                  /*Start a new wakelock with a timeout of 2 minutes to ensure that the logfile will be uploaded*/
                     }
 
@@ -326,28 +325,6 @@ public class MainActivity extends ActionBarActivity {                           
 //-------------------------------- END LOGGING ABOVE ---------------------------------------------//
 
 
-//-------------------------------- SET STEP LENGTH BELOW -----------------------------------------//
-
-        setStepLength.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                try {
-                    stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());
-                } catch (NumberFormatException e) {
-                    Toast.makeText(getApplicationContext(), "Please only use " +
-                                    "numbers and specify the length in meters, e.g. 65",
-                            Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-                }
-
-            }
-        });
-
-//-------------------------------- SET STEP LENGTH ABOVE -----------------------------------------//
-
-
 //-------------------------------- FILE CREATION BELOW -------------------------------------------//
 
             createFileBtn.setOnClickListener(new View.OnClickListener() {                           /*Create a listener service that checks if the button that creates a new file has been pressed*/
@@ -356,14 +333,24 @@ public class MainActivity extends ActionBarActivity {                           
 
                     if (!switchLogging.isChecked()) {
 
-                        userId[0] = Media.getId();
-                        audioMode[0] = Media.getMode();
+                        userId[0] = Media.getId();                                                  /*Calls the user ID from the media class*/
+                        audioMode[0] = Media.getMode();                                             /*Calls the audio mode from the media class*/
 
                         fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" +
                                 String.valueOf(System.currentTimeMillis() + ".txt");
 
                         Media.createFile(folderName, fileName[0]);                                  /*Creates a new file with the name of fileName[0] and location of folderName*/
                         Logging.startWriter(folderName, fileName[0]);                               /*Starts a writer to the file in folderName/fileName[0]*/
+
+                        try {
+                            stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());    /*Calls the value stored in the text field and saves it to a String*/
+                        } catch (NumberFormatException e) {
+                            Toast.makeText(getApplicationContext(), "Please only use " +
+                                            "numbers and specify the length in meters, e.g. 65",
+                                    Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                        }
+
                     } else {
                         String toastMsg = "Please stop logging before starting a new session";
                         Toast.makeText(getApplicationContext(), toastMsg,
