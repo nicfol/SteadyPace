@@ -138,6 +138,8 @@ public class Media {
 
     }
 
+    static boolean result = false;
+
     /**
      * Upload a file to a FTP server.
      *
@@ -146,33 +148,37 @@ public class Media {
      */
     static String uploadFTP(final String filename) {
 
-        try {
-            FTPClient ftpConnection = new FTPClient();                                              /*Construct an FTPClient from the Apache commons library*/
-            ftpConnection.connect("31.170.160.101");                                                /*Host for the FTP*/
-            ftpConnection.login("a2212160", "fisk123");                                             /*Username and code ord*/
+        if (!result) {
+            try {
+                FTPClient ftpConnection = new FTPClient();                                              /*Construct an FTPClient from the Apache commons library*/
+                ftpConnection.connect("31.170.160.101");                                                /*Host for the FTP*/
+                ftpConnection.login("a2212160", "fisk123");                                             /*Username and code ord*/
 
-            ftpConnection.enterLocalPassiveMode();                                                  /*Use passive mode to connect to the FTP (Connect through port 21)*/
-            ftpConnection.setFileType(FTP.BINARY_FILE_TYPE);                                        /*Set the transfer type to binary, meaning we convert everything to binary before uploading*/
-            String data = Environment.getExternalStorageDirectory().toString() +
-                    "/Android/data/com.nicolaifoldager.p4_prototype/" + filename;                   /*Location and name of the file that is going to be uploaded*/
+                ftpConnection.enterLocalPassiveMode();                                                  /*Use passive mode to connect to the FTP (Connect through port 21)*/
+                ftpConnection.setFileType(FTP.BINARY_FILE_TYPE);                                        /*Set the transfer type to binary, meaning we convert everything to binary before uploading*/
+                ftpConnection.changeWorkingDirectory("/public_html/logs/");                             /*Change the directory the file will be uploaded to on the FTP server*/
 
-            FileInputStream in = new FileInputStream(new File(data));                               /*Start a new inputStream from the file we want uploaded so we can read from it to the FTP*/
-            ftpConnection.changeWorkingDirectory("/public_html/logs/");                             /*Change the directory the file will be uploaded to on the FTP server*/
-            boolean result = ftpConnection.storeFile(filename, in);                                 /*Print the result of the file upload*/
-            in.close();                                                                             /*Closes the filestream*/
+                String data = Environment.getExternalStorageDirectory().toString() +
+                        "/Android/data/com.nicolaifoldager.p4_prototype/" + filename;                   /*Location and name of the file that is going to be uploaded*/
 
-            ftpConnection.logout();                                                                 /*Logs out of the session at the FTP server*/
-            ftpConnection.disconnect();                                                             /*Disconnects from the FTP server*/
+                FileInputStream in = new FileInputStream(new File(data));                               /*Start a new inputStream from the file we want uploaded so we can read from it to the FTP*/
+                result = ftpConnection.storeFile(filename, in);                                         /*Print the result of the file upload*/
+                in.close();                                                                             /*Closes the filestream*/
 
-            Log.i("Media/uploadFTP","Log file uploaded: " + result);                                /*Prints the result of the file upload*/
+                ftpConnection.logout();                                                                 /*Logs out of the session at the FTP server*/
+                ftpConnection.disconnect();                                                             /*Disconnects from the FTP server*/
 
-            return null;
-        } catch (Exception e) {
-            //new uploadFiles().execute(filename, filename);
-            e.printStackTrace(System.out);
-            return null;
+                Log.i("Media/uploadFTP","Log file uploaded: " + result);                                /*Prints the result of the file upload*/
+
+                return null;
+            } catch (Exception e) {
+                //new uploadFiles().execute(filename, filename);
+                e.printStackTrace(System.out);
+                return null;
+            }
         }
 
+        return null;
     }
 
     /**
