@@ -285,7 +285,10 @@ public class MainActivity extends ActionBarActivity {                           
                     loggingStatus.setTextColor(Color.rgb(255,0,0));                                 /*Set the text color to red in the UI*/
                     loggingStatus.setText("No");                                                    /*Set the text to no in the UI*/
 
-                    double avgSpeed = totalSpeed[0] / iterations[0];                                /*Divide total speed with the iteration counter to get average speed*/
+                    double avgSpeed = totalSpeed[0] / iterations[0];                                /*Divide total speed with the iteration counter to get average speed in KPH*/
+
+                    //TODO calculate distance based on average speed (kph) and steplength (meters)
+                    double distance = avgSpeed * stepLength[0];
 
                     try {
                         logWriter.stopWriter("");                                                   /*Stops the filewriter*/
@@ -305,8 +308,6 @@ public class MainActivity extends ActionBarActivity {                           
                         avgSpeed = 0.0;
                         iterations[0] = 1.0;
                         fileName[0] = null;
-                        Log.i("Main/Logging listener", "Variables reset: avgSpeed, " +
-                                "iterations & currentFileName");
                         Log.i("Main/Logging listener", "Iterations: " + iterations[0] +
                                 " Average Speed: " + avgSpeed + " Current filename: "
                                 + fileName[0]);
@@ -334,13 +335,13 @@ public class MainActivity extends ActionBarActivity {                           
 
                 try {
                     stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());
-                    System.out.println("----------------------------------------" + stepLength[0]);
                 } catch (NumberFormatException e) {
-                    Toast.makeText(getApplicationContext(), "Wrong format, please only use " +
-                                    "and specify the length in meters.",
+                    Toast.makeText(getApplicationContext(), "Please only use " +
+                                    "numbers and specify the length in meters, e.g. 65",
                             Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
+
             }
         });
 
