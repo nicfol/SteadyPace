@@ -114,6 +114,7 @@ public class MainActivity extends ActionBarActivity {                           
 
         final double[] totalSpeed = {0.0};                                                          /*Total speed, used to calc average speed*/
         final double[] iterations = {1.0};                                                          /*How many times the location manager have updated the speed (How many entries we have in the log file)*/
+        final double[] avgSpeed = {0.0};
 
         final String[] audioMode = {null};                                                          /*Stores the audioMode*/
         final String[] userId = {"0"};                                                              /*Stores the userID*/
@@ -254,15 +255,35 @@ public class MainActivity extends ActionBarActivity {                           
                 } else if (switchLogging.isChecked()) {                                             /*If the switch is already checked then run the scope*/
                     startAudio();                                                                   /*Starts the audio feedback*/
                     Log.i("Main/Logging listener", "on / logging");
+
                     setStepLengthBtn.setEnabled(false);
                     rBtnNoSound.setEnabled(false);
                     rBtnSound.setEnabled(false);
                     createFileBtn.setEnabled(false);
+                    stepLengthTxt.setFocusable(false);
 
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
                     updatePin(4);
                 } else {
+
+                    //TODO calculate distance based on average speed (kph) and step length (meters)
+                    if(rBtnNoSound.isChecked()) {
+                        Logging prefsLog = new Logging();
+                        prefsLog.startWriter(folderName, "prefs.txt");
+
+                        avgSpeed[0] = totalSpeed[0] / iterations[0];
+                        double distance = avgSpeed[0] * (iterations[0] / 60);
+                        System.out.println(distance+ "-------------------");
+
+                        try {
+                            prefsLog.write("");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
                     stopAudio();                                                                    /*Stops the audio feedback*/
                     Log.i("Main/Logging listener", "off / not logging");
 
@@ -270,11 +291,7 @@ public class MainActivity extends ActionBarActivity {                           
                     rBtnNoSound.setEnabled(true);
                     rBtnSound.setEnabled(true);
                     createFileBtn.setEnabled(true);
-
-                    double avgSpeed = totalSpeed[0] / iterations[0];                                /*Divide total speed with the iteration counter to get average speed in KPH*/
-
-                    //TODO calculate distance based on average speed (kph) and step length (meters)
-                    double distance = avgSpeed * stepLength[0];
+                    stepLengthTxt.setFocusable(true);
 
                     try {
                         logWriter.stopWriter("");                                                   /*Stops the filewriter*/
@@ -290,21 +307,19 @@ public class MainActivity extends ActionBarActivity {                           
                      * It also sets the current file name to null, this is to make
                      * sure we don't write to the same file twice.
                      */
-                    if(avgSpeed != 0.0 || iterations[0] != 0.0 || fileName[0] != null) {
-                        avgSpeed = 0.0;
+                    if(avgSpeed[0] != 0.0 || iterations[0] != 0.0 || fileName[0] != null) {
+                        avgSpeed[0] = 0.0;
                         iterations[0] = 1.0;
                         fileName[0] = null;
                         Log.i("Main/Logging listener", "Iterations: " + iterations[0] +
                                 " Average Speed: " + avgSpeed + " Current filename: "
                                 + fileName[0]);
-
                     }
 
                     if (mWakeLock.isHeld()) {                                                       /*Check if a wakelock is held*/
                         mWakeLock.release();                                                        /*Release it so it won't drain battery*/
                         mWakeLock.acquire(120000);                                                  /*Start a new wakelock with a timeout of 2 minutes to ensure that the logfile will be uploaded*/
                     }
-
                 }
             }
         });
@@ -323,7 +338,7 @@ public class MainActivity extends ActionBarActivity {                           
                         Toast.makeText(getApplicationContext(), toastMsg,
                                 Toast.LENGTH_LONG).show();
                     } else if(stepLength[0] == 0.0) {
-                        String toastMsg = "Please set the step length";
+                        String toastMsg = "Please set your step length";
                         Toast.makeText(getApplicationContext(), toastMsg,
                                 Toast.LENGTH_LONG).show();
 

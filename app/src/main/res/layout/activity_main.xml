@@ -198,7 +198,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Start A New Session"
+                android:text="Create A New Session"
                 android:id="@+id/textView3CreateSessionHeader"
                 android:textStyle="bold" />
 
