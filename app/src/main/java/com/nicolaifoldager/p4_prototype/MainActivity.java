@@ -24,7 +24,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -40,7 +39,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.puredata.android.io.AudioParameters;
@@ -184,9 +182,6 @@ public class MainActivity extends ActionBarActivity {                           
                 float speedMPS = location.getSpeed();                                               /*Get the current speed from the location manager in m/s*/
                 float speedKPH = 3.6f * speedMPS;                                                   /*Convert to KPH. 3.6 because that's what you need to go from m/s to km/h*/
 
-                final TextView currentSpeed = (TextView) findViewById(R.id.currentSpeed);           /*Construct TextView*/
-                currentSpeed.setText(String.valueOf(speedKPH));                                     /*Update the UI to show the current speed in km/h*/
-
                 double getLon = location.getLongitude();                                            /*Gets the longitude from the location manager*/
                 double getLat = location.getLatitude();                                             /*Gets the latitude from the location manager*/
 
@@ -220,22 +215,16 @@ public class MainActivity extends ActionBarActivity {                           
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {               /*If the provider status has changed*/
-                final TextView gpsStatus = (TextView) findViewById(R.id.gpsStatus);                 /*Construct TextView*/
-                gpsStatus.setText(provider);
                 Log.i("Main/Location listener", "Provider changed to " + provider);
             }
 
             @Override
             public void onProviderEnabled(String provider) {                                        /*If the provider is enabled*/
-                final TextView gpsStatus = (TextView) findViewById(R.id.gpsStatus);                 /*Construct TextView*/
-                gpsStatus.setText(provider);
                 Log.i("Main/Location listener", "Provider changed to " + provider);
             }
 
             @Override
             public void onProviderDisabled(String provider) {                                       /*If the provider is disabled*/
-                final TextView gpsStatus = (TextView) findViewById(R.id.gpsStatus);                 /*Construct TextView*/
-                gpsStatus.setText(provider);
                 Log.i("Main/Location listener", "Provider changed to " + provider);
             }
         };
@@ -254,8 +243,6 @@ public class MainActivity extends ActionBarActivity {                           
         switchLogging.setOnClickListener(new View.OnClickListener() {                               /*Create a listener service that checks if the switch that controls the logging is pressed*/
             public void onClick(View v) {
 
-                TextView loggingStatus = (TextView) findViewById(R.id.isLogging);                   /*Construct TextView*/
-
                 if(fileName[0] == null) {                                                           /*Checks if a file has been created, if not then it'll toast an error*/
                     Toast.makeText(getApplicationContext(), "Please start a new session",
                             Toast.LENGTH_LONG).show();
@@ -273,16 +260,10 @@ public class MainActivity extends ActionBarActivity {                           
                     startAudio();                                                                   /*Starts the audio feedback*/
                     Log.i("Main/Logging listener", "on / logging");
 
-                    loggingStatus.setTextColor(Color.rgb(0, 255, 0));                               /*Set the text color to green in the UI*/
-                    loggingStatus.setText("Yes");                                                   /*Change the text to yes in the UI*/
-
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
                 } else {
                     stopAudio();                                                                    /*Stops the audio feedback*/
                     Log.i("Main/Logging listener", "off / not logging");
-
-                    loggingStatus.setTextColor(Color.rgb(255,0,0));                                 /*Set the text color to red in the UI*/
-                    loggingStatus.setText("No");                                                    /*Set the text to no in the UI*/
 
                     double avgSpeed = totalSpeed[0] / iterations[0];                                /*Divide total speed with the iteration counter to get average speed in KPH*/
 
