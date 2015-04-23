@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 public class uploadFiles extends AsyncTask<String, String, String> {
 
     private boolean running = true;
+    private int cnt = 0;
 
     @Override
     protected void onCancelled() {
@@ -17,7 +18,7 @@ public class uploadFiles extends AsyncTask<String, String, String> {
         Media media = new Media();
 
 
-        while(running) {
+        while(running || cnt > 50) {
             media.uploadFTP(filename[0]);
         }
 
