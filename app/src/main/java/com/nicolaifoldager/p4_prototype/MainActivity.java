@@ -254,7 +254,10 @@ public class MainActivity extends ActionBarActivity {                           
                 } else if (switchLogging.isChecked()) {                                             /*If the switch is already checked then run the scope*/
                     startAudio();                                                                   /*Starts the audio feedback*/
                     Log.i("Main/Logging listener", "on / logging");
-                    stepLengthTxt.
+                    setStepLengthBtn.setEnabled(false);
+                    rBtnNoSound.setEnabled(false);
+                    rBtnSound.setEnabled(false);
+                    createFileBtn.setEnabled(false);
 
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
@@ -262,6 +265,11 @@ public class MainActivity extends ActionBarActivity {                           
                 } else {
                     stopAudio();                                                                    /*Stops the audio feedback*/
                     Log.i("Main/Logging listener", "off / not logging");
+
+                    setStepLengthBtn.setEnabled(true);
+                    rBtnNoSound.setEnabled(true);
+                    rBtnSound.setEnabled(true);
+                    createFileBtn.setEnabled(true);
 
                     double avgSpeed = totalSpeed[0] / iterations[0];                                /*Divide total speed with the iteration counter to get average speed in KPH*/
 
@@ -381,10 +389,9 @@ public class MainActivity extends ActionBarActivity {                           
     public void showUploadDialog() {
         AlertDialog.Builder alertDialogUpload = new AlertDialog.Builder(this);                      /*Construct a new dialog box*/
         alertDialogUpload.setMessage("Uploading file")                                              /*Sets the message in the dialog box*/
-                .setNegativeButton("Cancel",                                                        /*Sets the name of the negative button*/
+                .setNegativeButton("Okay",                                                        /*Sets the name of the negative button*/
                         new DialogInterface.OnClickListener() {                                     /*Creates the on click listener service*/
                             public void onClick(DialogInterface dialog, int id) {
-                                uploadFiles.cancel(true);
                                 dialog.cancel();                                                    /*Cancels the dialog box*/
                             }
                         });
