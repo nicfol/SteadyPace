@@ -41,6 +41,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -93,6 +94,9 @@ public class MainActivity extends ActionBarActivity {                           
         //Call the elements in the UI for onClickListeners
         final Switch switchLogging = (Switch) findViewById(R.id.switchStartLogging);                /*Logging Switch*/
         final Button createFileBtn = (Button) findViewById(R.id.createFile);                        /*Create new file button*/
+        final Button setStepLengthBtn = (Button) findViewById(R.id.setStepLengthBtn);
+
+        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
 
         final RadioButton rBtnNoSound = (RadioButton) findViewById(R.id.rBtnNoSound);               /*Radiobutton for no sound audio mode*/
         final RadioButton rBtnSound = (RadioButton) findViewById(R.id.rBtnSound);                   /*Radiobutton for sound audio mode*/
@@ -114,7 +118,7 @@ public class MainActivity extends ActionBarActivity {                           
         final String[] audioMode = {null};                                                          /*Stores the audioMode*/
         final String[] userId = {"0"};                                                              /*Stores the userID*/
         final String[] fileName = {null};                                                           /*Saves the filename*/
-        final double[] stepLength = {0};
+        final double[] stepLength = {0.0};
 
         final String folderName = Environment.getExternalStorageDirectory().toString()+
                 "/Android/data/com.nicolaifoldager.p4_prototype/";                                  /*Specify the path to the file directory we will save to*/
@@ -133,14 +137,8 @@ public class MainActivity extends ActionBarActivity {                           
 //---------------------------------------- INIT PD BELOW -----------------------------------------//
 
         //Initializes the PD library and opens an sound output
-        try {
             init_pd();
             loadPdPatch();
-        } catch (IOException e) {
-            e.printStackTrace(System.out);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
 //---------------------------------------- INIT PD ABOVE -----------------------------------------//
 
@@ -148,14 +146,8 @@ public class MainActivity extends ActionBarActivity {                           
 //--------------------------------------- INIT BELOW ---------------------------------------------//
 
         if(media.rwAccess()) {
-            try {
-                media.createFolder(folderName);                                                     /*Checks if a folder is created, if not it will create one.*/
-                Media.createPrefs(folderName);                                                      /*Checks if a preferences file has been created, if not it makes one and assigns a user ID and mode*/
-            } catch (Exception e) {
-                String toastMsg = e.getMessage();
-                Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
-                e.printStackTrace(System.out);
-            }
+            media.createFolder(folderName);                                                         /*Checks if a folder is created, if not it will create one.*/
+            Media.createPrefs(folderName);                                                          /*Checks if a preferences file has been created, if not it makes one and assigns a user ID and mode*/
 
             userId[0] = Media.getId();                                                              /*Gets the ID from the Media class that reads prefs.txt*/
             audioMode[0] = Media.getMode();                                                         /*Gets the audio mode from the Media class that reads prefs.txt*/
@@ -195,7 +187,7 @@ public class MainActivity extends ActionBarActivity {                           
                         logWriter.write(msg);                                                   /*Write the string endMsg to the FileWriter*/
                         totalSpeed[0] += speedKPH;                                              /*Add the current speed to total speed*/
                         iterations[0] += 1;                                                     /*Add 1 to the iteration counter*/
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         String toastMsg = e.getMessage();
                         Toast.makeText(getApplicationContext(), toastMsg,
                                 Toast.LENGTH_LONG).show();
@@ -262,8 +254,11 @@ public class MainActivity extends ActionBarActivity {                           
                 } else if (switchLogging.isChecked()) {                                             /*If the switch is already checked then run the scope*/
                     startAudio();                                                                   /*Starts the audio feedback*/
                     Log.i("Main/Logging listener", "on / logging");
+                    stepLengthTxt.
+
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
+                    updatePin(4);
                 } else {
                     stopAudio();                                                                    /*Stops the audio feedback*/
                     Log.i("Main/Logging listener", "off / not logging");
@@ -315,8 +310,20 @@ public class MainActivity extends ActionBarActivity {                           
                 @Override
                 public void onClick(View v) {
 
-                    if (!switchLogging.isChecked()) {
+                    if(switchLogging.isChecked()) {
+                        String toastMsg = "Please stop logging before starting a new session";
+                        Toast.makeText(getApplicationContext(), toastMsg,
+                                Toast.LENGTH_LONG).show();
+                    } else if(stepLength[0] == 0.0) {
+                        String toastMsg = "Please set the step length";
+                        Toast.makeText(getApplicationContext(), toastMsg,
+                                Toast.LENGTH_LONG).show();
 
+                    } else if(!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {
+                        String toastMsg = "Please set the feedback mode";
+                        Toast.makeText(getApplicationContext(), toastMsg,
+                                Toast.LENGTH_LONG).show();
+                    } else {
                         userId[0] = Media.getId();                                                  /*Calls the user ID from the media class*/
                         audioMode[0] = Media.getMode();                                             /*Calls the audio mode from the media class*/
 
@@ -326,35 +333,47 @@ public class MainActivity extends ActionBarActivity {                           
                         Media.createFile(folderName, fileName[0]);                                  /*Creates a new file with the name of fileName[0] and location of folderName*/
                         Logging.startWriter(folderName, fileName[0]);                               /*Starts a writer to the file in folderName/fileName[0]*/
 
-                        try {
-                            stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());    /*Calls the value stored in the text field and saves it to a String*/
-                            updatePin(3);                                                           /*Update the pin on the activity*/
-                        } catch (NumberFormatException e) {
-                            Toast.makeText(getApplicationContext(), "Please only use " +
-                                            "numbers and specify the length in meters, e.g. 65",
-                                    Toast.LENGTH_LONG).show();
-                            e.printStackTrace();
-                        }
-
-
-
-                    } else {
-                        String toastMsg = "Please stop logging before starting a new session";
-                        Toast.makeText(getApplicationContext(), toastMsg,
-                                Toast.LENGTH_LONG).show();
+                        updatePin(3);
                     }
 
                 }
 
             });
 
+        setStepLengthBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-        //TODO If steplength is set
-        //TODO If radiobutotn is set
+                    try {
+                        stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());    /*Calls the value stored in the text field and saves it to a String*/
+                        updatePin(1);                                                           /*Update the pin on the activity*/
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(getApplicationContext(), "Please only use " +
+                                        "numbers and specify the length in meters, e.g. 65",
+                                Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+
+            }
+
+        });
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            boolean hasChanged = false;
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId)
+            {
+                if(!hasChanged) {
+                    hasChanged = true;
+                    updatePin(2);
+                }
+            }
+        });
 
 //-------------------------------- FILE CREATION ABOVE -------------------------------------------//
 
-    }
+    }//On create
 
      /**
      * Shows the dialog that tells the user, that the upload is doing stuff
@@ -403,6 +422,11 @@ public class MainActivity extends ActionBarActivity {                           
         }
     }
 
+    /**
+     * Updates the pin in the left when the user has succesfully completed a task
+     *
+     * @param pinName   The number on the pin that sould be changed corresponds to the pinName
+     */
     void updatePin(final int pinName) {
         final ImageView[] pin = {null};
 
@@ -414,7 +438,6 @@ public class MainActivity extends ActionBarActivity {                           
             pin[0] = (ImageView) findViewById(R.id.imageViewPin3);
         else if (pinName == 4)
             pin[0] = (ImageView) findViewById(R.id.imageViewPin4);
-
 
         final Animation textOut = new AlphaAnimation(1.0f, 0.00f);
         textOut.setDuration(350);
@@ -448,39 +471,43 @@ public class MainActivity extends ActionBarActivity {                           
 
      /**
      * Initializes PD Library and prepares the audio outlet.
-     *
-     * @throws IOException
      */
-    public void init_pd() throws IOException {
+    public void init_pd() {
 
-        // Configure the audio glue
-        int sampleRate = AudioParameters.suggestSampleRate();
-        PdAudio.initAudio(sampleRate, 0, 2, 8, true);
+        try {
+            // Configure the audio glue
+            int sampleRate = AudioParameters.suggestSampleRate();
+            PdAudio.initAudio(sampleRate, 0, 2, 8, true);
 
-        // Create and install the dispatcher
-        dispatcher = new PdUiDispatcher();
-        PdBase.setReceiver(dispatcher);
+            // Create and install the dispatcher
+            dispatcher = new PdUiDispatcher();
+            PdBase.setReceiver(dispatcher);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
     /**
      * Loads the PD patch so the app can communicate with it.
-     *
-     * @throws IOException
      */
-    void loadPdPatch() throws Exception {
+    void loadPdPatch() {
 
-        File dir = getFilesDir();
+        try {
+            File dir = getFilesDir();
 
-        IoUtils.extractZipResource(getResources().openRawResource(R.raw.pdpatch), dir, true);
-        File patchFile = new File(dir, "pdpatch.pd");
-        PdBase.openPatch(patchFile.getAbsolutePath());
+            IoUtils.extractZipResource(getResources().openRawResource(R.raw.pdpatch), dir, true);
+            File patchFile = new File(dir, "pdpatch.pd");
+            PdBase.openPatch(patchFile.getAbsolutePath());
 
-        Log.i("MainActiviy/loadPdPatch", "Patch loaded");
+            Log.i("MainActiviy/loadPdPatch", "Patch loaded");
 
-        floatToPd("osc_volume", 0.0f);
+            floatToPd("osc_volume", 0.0f);
 
-        floatToPd("osc_pitch", 614.0f);
+            floatToPd("osc_pitch", 614.0f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

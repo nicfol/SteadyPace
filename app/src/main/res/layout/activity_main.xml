@@ -53,7 +53,9 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_centerVertical="true">
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                >
 
                 <EditText
                     android:layout_width="wrap_content"
@@ -62,16 +64,31 @@
                     android:ems="3"
                     android:id="@+id/stepLengthField"
                     android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true" />
+                    android:layout_toLeftOf="@+id/textView3"
+                    android:layout_toStartOf="@+id/textView3" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="cm"
                     android:id="@+id/textView3"
-                    android:layout_centerVertical="true"
-                    android:layout_toRightOf="@+id/stepLengthField"
-                    android:layout_toEndOf="@+id/stepLengthField" />
+                    android:layout_alignBaseline="@+id/setStepLengthBtn"
+                    android:layout_alignBottom="@+id/setStepLengthBtn"
+                    android:layout_centerHorizontal="true" />
+
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Set"
+                    android:id="@+id/setStepLengthBtn"
+                    android:layout_alignBottom="@+id/stepLengthField"
+                    android:layout_toRightOf="@+id/textView3"
+                    android:layout_toEndOf="@+id/textView3"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
             </RelativeLayout>
 
         </LinearLayout>
@@ -120,6 +137,12 @@
                     android:layout_height="fill_parent"
                     android:gravity="center_horizontal">
 
+                    <RadioGroup
+                        android:id="@+id/radioGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation='horizontal'>
+
                     <RadioButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -141,6 +164,8 @@
                         android:layout_alignParentTop="true"
                         android:layout_toRightOf="@+id/rBtnSound"
                         android:layout_toEndOf="@+id/rBtnSound" />
+
+                    </RadioGroup>
 
                 </RelativeLayout>
 
@@ -190,7 +215,8 @@
                 android:layout_height="40dp"
                 android:text="New Session"
                 android:id="@+id/createFile"
-                android:layout_gravity="center_horizontal" />
+                android:layout_gravity="center_horizontal"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
 
 
         </LinearLayout>
@@ -242,7 +268,8 @@
                     android:layout_height="wrap_content"
                     android:text="Start session"
                     android:id="@+id/switchStartLogging"
-                    android:layout_gravity="center_horizontal" />
+                    android:layout_gravity="center_horizontal"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
 
             </LinearLayout>
 
