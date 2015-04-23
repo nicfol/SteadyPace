@@ -35,8 +35,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -325,12 +328,15 @@ public class MainActivity extends ActionBarActivity {                           
 
                         try {
                             stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());    /*Calls the value stored in the text field and saves it to a String*/
+                            updatePin(3);                                                           /*Update the pin on the activity*/
                         } catch (NumberFormatException e) {
                             Toast.makeText(getApplicationContext(), "Please only use " +
                                             "numbers and specify the length in meters, e.g. 65",
                                     Toast.LENGTH_LONG).show();
                             e.printStackTrace();
                         }
+
+
 
                     } else {
                         String toastMsg = "Please stop logging before starting a new session";
@@ -341,6 +347,10 @@ public class MainActivity extends ActionBarActivity {                           
                 }
 
             });
+
+
+        //TODO If steplength is set
+        //TODO If radiobutotn is set
 
 //-------------------------------- FILE CREATION ABOVE -------------------------------------------//
 
@@ -393,7 +403,50 @@ public class MainActivity extends ActionBarActivity {                           
         }
     }
 
-    /**
+    void updatePin(final int pinName) {
+        final ImageView[] pin = {null};
+
+        if (pinName == 1)
+            pin[0] = (ImageView) findViewById(R.id.imageViewPin1);
+        else if (pinName == 2)
+            pin[0] = (ImageView) findViewById(R.id.imageViewPin2);
+        else if (pinName == 3)
+            pin[0] = (ImageView) findViewById(R.id.imageViewPin3);
+        else if (pinName == 4)
+            pin[0] = (ImageView) findViewById(R.id.imageViewPin4);
+
+
+        final Animation textOut = new AlphaAnimation(1.0f, 0.00f);
+        textOut.setDuration(350);
+        final Animation textIn = new AlphaAnimation(0.00f, 1.0f);
+        textIn.setDuration(350);
+
+        pin[0].startAnimation(textOut);
+
+        textOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                if (pinName == 1)
+                    pin[0].setImageResource(R.mipmap.onegreen);
+                else if (pinName == 2)
+                    pin[0].setImageResource(R.mipmap.twogreen);
+                else if (pinName == 3)
+                    pin[0].setImageResource(R.mipmap.threegreen);
+                else if (pinName == 4)
+                    pin[0].setImageResource(R.mipmap.fourgreen);
+
+                pin[0].startAnimation(textIn);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+    }
+
+     /**
      * Initializes PD Library and prepares the audio outlet.
      *
      * @throws IOException

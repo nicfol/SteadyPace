@@ -22,7 +22,7 @@
         android:layout_marginBottom="5dp" >
 
         <ImageView
-            android:src="@+mipmap/one"
+            android:src="@+mipmap/onered"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:id="@+id/imageViewPin1"
@@ -87,7 +87,7 @@
         android:layout_marginBottom="5dp" >
 
         <ImageView
-            android:src="@+mipmap/two"
+            android:src="@+mipmap/twored"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:id="@+id/imageViewPin2"
@@ -115,39 +115,34 @@
                 android:text="First you must chose the audio feedback mode. If this is your first run, then please turn off the feedback, otherwise please turn it on."
                 android:id="@+id/textView2AudioFeedbackContext" />
 
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:gravity="center_horizontal">
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:gravity="center_horizontal">
 
-                <RadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="On"
-                    android:id="@+id/rBtnSound"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true" />
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="On"
+                        android:id="@+id/rBtnSound"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true" />
 
-                <RadioButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Off"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginStart="5dp"
-                    android:id="@+id/rBtnNoSound"
-                    android:layout_alignParentTop="true"
-                    android:layout_toRightOf="@+id/rBtnSound"
-                    android:layout_toEndOf="@+id/rBtnSound" />
-            </RelativeLayout>
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Off"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
+                        android:id="@+id/rBtnNoSound"
+                        android:layout_alignParentTop="true"
+                        android:layout_toRightOf="@+id/rBtnSound"
+                        android:layout_toEndOf="@+id/rBtnSound" />
 
-            <RadioGroup
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-            </RadioGroup>
+                </RelativeLayout>
 
         </LinearLayout>
 
@@ -161,7 +156,7 @@
         android:layout_marginBottom="5dp" >
 
         <ImageView
-            android:src="@+mipmap/redthree"
+            android:src="@+mipmap/threered"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:id="@+id/imageViewPin3"
@@ -210,7 +205,7 @@
         android:layout_marginBottom="5dp" >
 
         <ImageView
-            android:src="@+mipmap/four"
+            android:src="@+mipmap/fourred"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:id="@+id/imageViewPin4"
