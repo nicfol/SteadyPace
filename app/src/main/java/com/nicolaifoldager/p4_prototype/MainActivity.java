@@ -176,18 +176,17 @@ public class MainActivity extends ActionBarActivity {                           
                 float accuracy = location.getAccuracy();                                            /*Get the current accuracy from the location manager in meters*/
 
                 float speedMPS = location.getSpeed();                                               /*Get the current speed from the location manager in m/s*/
-                float speedKPH = 3.6f * speedMPS;                                                   /*Convert to KPH. 3.6 because that's what you need to go from m/s to km/h*/
 
                 double getLon = location.getLongitude();                                            /*Gets the longitude from the location manager*/
                 double getLat = location.getLatitude();                                             /*Gets the latitude from the location manager*/
 
                 if(switchLogging.isChecked()) {
                     try {
-                        String msg = iterations[0] + "\t" + speedKPH + "\t" + accuracy + "\t\t"
+                        String msg = iterations[0] + "\t" + speedMPS + "\t" + accuracy + "\t\t"
                                 + iterations[0] + "," + getLat + "," + getLon + "\n";
-                        logWriter.write(msg);                                                   /*Write the string endMsg to the FileWriter*/
-                        totalSpeed[0] += speedKPH;                                              /*Add the current speed to total speed*/
-                        iterations[0] += 1;                                                     /*Add 1 to the iteration counter*/
+                        logWriter.write(msg);                                                       /*Write the string endMsg to the FileWriter*/
+                        totalSpeed[0] += speedMPS;                                                  /*Add the current speed to total speed*/
+                        iterations[0] += 1;                                                         /*Add 1 to the iteration counter*/
                     } catch (Exception e) {
                         String toastMsg = e.getMessage();
                         Toast.makeText(getApplicationContext(), toastMsg,
@@ -256,37 +255,39 @@ public class MainActivity extends ActionBarActivity {                           
                     startAudio();                                                                   /*Starts the audio feedback*/
                     Log.i("Main/Logging listener", "on / logging");
 
+                    //Disables the controls
                     setStepLengthBtn.setEnabled(false);
                     rBtnNoSound.setEnabled(false);
                     rBtnSound.setEnabled(false);
                     createFileBtn.setEnabled(false);
                     stepLengthTxt.setFocusable(false);
 
-
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
-                    updatePin(4);
+                    updatePin(4);                                                                   /*Makes pin 4 green*/
                 } else {
 
-                    //TODO calculate distance based on average speed (kph) and step length (meters)
-                    if(rBtnNoSound.isChecked()) {
-                        Logging prefsLog = new Logging();
-                        prefsLog.startWriter(folderName, "prefs.txt");
+                    if(rBtnNoSound.isChecked()) {                                                   /*Check if no sound feedback has been used*/
+                        Logging prefsLog = new Logging();                                           /*Construct a new filewriter to the prefs.txt file*/
+                        prefsLog.startWriter(folderName, "prefs.txt");                              /*Starts the filewriter*/
 
-                        avgSpeed[0] = totalSpeed[0] / iterations[0];
-                        double distance = avgSpeed[0] * (iterations[0] / 60);
-                        System.out.println(distance+ "-------------------");
+                        avgSpeed[0] = totalSpeed[0] / iterations[0];                                /*Calculate average speed in meters per second*/
+
+                        double BPM = (avgSpeed[0] * 60) / (stepLength[0] / 100);                    /*speed in meters pr second devided by steplenth in cm times 100 equals BPM*/
 
                         try {
-                            prefsLog.write("");
+                            prefsLog.write("\n" + BPM);                                             /*Write BPM to the prefs.txt*/
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
 
+                    } else if (rBtnSound.isChecked()) {
+                        
                     }
 
                     stopAudio();                                                                    /*Stops the audio feedback*/
                     Log.i("Main/Logging listener", "off / not logging");
 
+                    //Enables the controls
                     setStepLengthBtn.setEnabled(true);
                     rBtnNoSound.setEnabled(true);
                     rBtnSound.setEnabled(true);
@@ -356,13 +357,19 @@ public class MainActivity extends ActionBarActivity {                           
                         Media.createFile(folderName, fileName[0]);                                  /*Creates a new file with the name of fileName[0] and location of folderName*/
                         Logging.startWriter(folderName, fileName[0]);                               /*Starts a writer to the file in folderName/fileName[0]*/
 
-                        updatePin(3);
+                        updatePin(3);                                                               /*Makes pin 4 green*/
                     }
 
                 }
 
             });
 
+
+        /*
+         * Anonymous listener to see if the set step length button has been pressed. if it have then
+         * check to see if the input is an integer, if it isn't then toast, else then update the
+         * pin.
+         */
         setStepLengthBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -381,6 +388,10 @@ public class MainActivity extends ActionBarActivity {                           
 
         });
 
+        /*
+         * Anonymous listener to see if either of he radio buttons has been checked, if hey have
+         *  then update the pin.
+         */
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
             boolean hasChanged = false;
@@ -389,7 +400,7 @@ public class MainActivity extends ActionBarActivity {                           
             {
                 if(!hasChanged) {
                     hasChanged = true;
-                    updatePin(2);
+                    updatePin(2);                                                                   /*Makes pin 4 green*/
                 }
             }
         });
