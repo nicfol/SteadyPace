@@ -19,6 +19,7 @@ public class Media {
 
     private static String[] deviceIdGlobal = {"0"};
     private static String[] modeGlobal = {"NOTSET"};
+    private static String[] BPMglobal ={"NOTSET"};
 
     /**
      * Checks if the applications has read/write access to the external storage (SD-Card). On phones
@@ -71,6 +72,7 @@ public class Media {
     static void createPrefs(String directory) {
 
         File prefs = new File(directory, "prefs.txt");                                              /*Creates a new File object at directory named prefs.txt*/
+        File bpmFile = new File(directory, "bpm.txt");                                              /*Creates a new File object at directory named prefs.txt*/
 
         if (prefs.exists()) {                                                                       /*Checks if the file already exists*/
             try {
@@ -81,6 +83,10 @@ public class Media {
 
                 Log.i("Media/createPrefs", "From prefs, device Id: " + deviceIdGlobal[0] +
                         " audiomode: " + modeGlobal[0]);
+
+                BufferedReader bpmReader = new BufferedReader(new FileReader(directory + "bpm.txt"));
+
+                BPMglobal[0] = bpmReader.readLine();
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace(System.out);
@@ -181,6 +187,10 @@ public class Media {
         return null;
     }
 
+
+
+
+
     /**
      * Used to get the audio mode that has been used in prior sessions
      *
@@ -197,6 +207,15 @@ public class Media {
      */
     static String getId() {
         return deviceIdGlobal[0];
+    }
+
+    /**
+     * Used to get the BPM calculated from the first run
+     *
+     * @return  Returns the BPM calculated from the calibration run
+     */
+    static String getBPM() {
+        return BPMglobal[0];
     }
 
 }

@@ -51,9 +51,7 @@ import org.puredata.android.utils.PdUiDispatcher;
 import org.puredata.core.PdBase;
 import org.puredata.core.utils.IoUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 
 //-------------------------------- LIBRARIES ABOVE -----------------------------------------------//
@@ -123,6 +121,7 @@ public class MainActivity extends ActionBarActivity {                           
         final String[] fileName = {null};                                                           /*Saves the filename*/
         final double[] stepLength = {0.0};
         final double[] prefsBPMdouble = {0};
+        final double[] BPM = {0.0};
 
         final String[] folderName = {Environment.getExternalStorageDirectory().toString()+
                 "/Android/data/com.nicolaifoldager.p4_prototype/"};                                  /*Specify the path to the file directory we will save to*/
@@ -189,10 +188,10 @@ public class MainActivity extends ActionBarActivity {                           
                                 + iterations[0] + "," + getLat + "," + getLon + "\n";
                         logWriter.write(msg);                                                       /*Write the string endMsg to the FileWriter*/
                         totalSpeed[0] += speedMPS;                                                  /*Add the current speed to total speed*/
+                        System.out.println("Speed m/s: " + speedMPS + " - Total speed: " +totalSpeed[0]);
                         iterations[0] += 1;                                                         /*Add 1 to the iteration counter*/
                     } catch (Exception e) {
-                        String toastMsg = e.getMessage();
-                        Toast.makeText(getApplicationContext(), toastMsg,
+                        Toast.makeText(getApplicationContext(), e.getMessage(),
                                 Toast.LENGTH_LONG).show();
                         e.printStackTrace(System.out);
                     }
@@ -200,12 +199,15 @@ public class MainActivity extends ActionBarActivity {                           
                     if(audioMode[0].equals("cont")) {
                         //Cont sound
                         Log.i("--------------------","1 cont");
+
                     } else if (audioMode[0].equals("disc")) {
                         //Discrete sound
                         Log.i("--------------------","2 disc");
+
                     } else {
                         //No sound
                         Log.i("--------------------","3 no sound");
+
                     }
 
                     }//If switchLogging is checked
@@ -256,25 +258,11 @@ public class MainActivity extends ActionBarActivity {                           
                     switchLogging.toggle();
                 } else if (switchLogging.isChecked()) {                                             /*If the switch is already checked then run the scope*/
 
-                    if (rBtnSound.isChecked()) {
-                        try {
-                            BufferedReader prefsReader = new BufferedReader(new FileReader
-                                    (folderName[0] + "prefs.txt"));                                 /*Start a filereader from prefs.txt to see get the BPM*/
-                            prefsReader.readLine();                                                 /*Skip the first line*/
-                            prefsReader.readLine();                                                 /*Skipe the second line*/
-                            String prefsBPM = prefsReader.readLine();                               /*Set the third line to string prefsBPM*/
+                    BPM[0] = Double.parseDouble(Media.getBPM());
 
-                            //TODO FIX THIS LINE, SHIT DOESN'T WORK, FUCK YOU MIKKEL I H8 U SK8 BOI
-                            //prefsBPMdouble[0] = Double.parseDouble(prefsBPM);                       /*parse it to a double*/
-                        } catch (Exception e) {
-                            Toast.makeText(getApplicationContext(), "Couldn't read preferences," +
-                                            " please try again", Toast.LENGTH_LONG).show();
-                            switchLogging.toggle();                                                 /*Toggle the switch back due to the error*/
-                            e.printStackTrace(System.out);
-                        }
-                    }
-
+                    System.out.println("------------------------------BPM: " + BPM[0]);
                     startAudio();                                                                   /*Starts the audio feedback*/
+
                     Log.i("Main/Logging listener", "on / logging");
 
                     //Disables the controls
@@ -285,19 +273,31 @@ public class MainActivity extends ActionBarActivity {                           
                     stepLengthTxt.setFocusable(false);
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
-                    updatePin(4);                                                                   /*Makes pin 4 green*/
+                    updatePin(4, true);                                                             /*Makes pin 4 green*/
                 } else {
 
-                    if(rBtnNoSound.isChecked()) {                                                   /*Check if no sound feedback has been used*/
-                        Logging prefsLog = new Logging();                                           /*Construct a new filewriter to the prefs.txt file*/
-                        prefsLog.startWriter(folderName[0], "prefs.txt");                           /*Starts the filewriter*/
+                    for(int i = 1; i <= 4; i++) {
+                        updatePin(i, false);
+                    }
 
+                    if(rBtnNoSound.isChecked() /* && iterations[0] <300*/ ) {                        /*Check if no sound feedback has been used*/
+                        Logging prefsLog = new Logging();                                           /*Construct a new filewriter to the prefs.txt file*/
+                        Media medLog = new Media();                                                 /*Construct a new Media class to create a new file*/
+
+                        String bpmFileName = "bpm.txt";                                             /*Name of the file that BPM is stored in*/
+                        medLog.createFile(folderName[0], bpmFileName);                              /*createa a new file with bpmFileName*/
+                        prefsLog.startWriter(folderName[0], bpmFileName);                           /*Starts the filewriter*/
+
+                        iterations[0] = iterations[0] - 1;
                         avgSpeed[0] = totalSpeed[0] / iterations[0];                                /*Calculate average speed in meters per second*/
 
+                        System.out.println("----------------------------avgSpeed " + totalSpeed[0] + " " + iterations[0] + " = " + avgSpeed[0]);
+
                         double BPM = (avgSpeed[0] * 60) / (stepLength[0] / 100);                    /*speed in meters pr second divided by step length in cm times 100 to convert to meters equals BPM*/
+                        System.out.println("----------------------------BMP " + BPM);
 
                         try {
-                            prefsLog.write("\n" + BPM);                                             /*Write BPM to the prefs.txt*/
+                            prefsLog.write("" + BPM);                                               /*Write BPM to the prefs.txt*/
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -332,7 +332,7 @@ public class MainActivity extends ActionBarActivity {                           
                         iterations[0] = 1.0;
                         fileName[0] = null;
                         Log.i("Main/Logging listener", "Iterations: " + iterations[0] +
-                                " Average Speed: " + avgSpeed + " Current filename: "
+                                " Average Speed: " + avgSpeed[0] + " Current filename: "
                                 + fileName[0]);
                     }
 
@@ -373,10 +373,10 @@ public class MainActivity extends ActionBarActivity {                           
                         fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" +
                                 String.valueOf(System.currentTimeMillis() + ".txt");
 
-                        Media.createFile(folderName[0], fileName[0]);                                  /*Creates a new file with the name of fileName[0] and location of folderName*/
-                        Logging.startWriter(folderName[0], fileName[0]);                               /*Starts a writer to the file in folderName/fileName[0]*/
+                        Media.createFile(folderName[0], fileName[0]);                               /*Creates a new file with the name of fileName[0] and location of folderName*/
+                        Logging.startWriter(folderName[0], fileName[0]);                            /*Starts a writer to the file in folderName/fileName[0]*/
 
-                        updatePin(3);                                                               /*Makes pin 4 green*/
+                        updatePin(3, true);                                                         /*Makes pin 4 green*/
                     }
 
                 }
@@ -394,8 +394,8 @@ public class MainActivity extends ActionBarActivity {                           
             public void onClick(View v) {
 
                     try {
-                        stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());    /*Calls the value stored in the text field and saves it to a String*/
-                        updatePin(1);                                                           /*Update the pin on the activity*/
+                        stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());        /*Calls the value stored in the text field and saves it to a String*/
+                        updatePin(1, true);                                                         /*Update the pin on the activity*/
                     } catch (NumberFormatException e) {
                         Toast.makeText(getApplicationContext(), "Please only use " +
                                         "numbers and specify the length in meters, e.g. 65",
@@ -419,7 +419,7 @@ public class MainActivity extends ActionBarActivity {                           
             {
                 if(!hasChanged) {
                     hasChanged = true;
-                    updatePin(2);                                                                   /*Makes pin 4 green*/
+                    updatePin(2, true);                                                                   /*Makes pin 4 green*/
                 }
             }
         });
@@ -434,7 +434,7 @@ public class MainActivity extends ActionBarActivity {                           
     public void showUploadDialog() {
         AlertDialog.Builder alertDialogUpload = new AlertDialog.Builder(this);                      /*Construct a new dialog box*/
         alertDialogUpload.setMessage("Uploading file")                                              /*Sets the message in the dialog box*/
-                .setNegativeButton("Okay",                                                        /*Sets the name of the negative button*/
+                .setNegativeButton("Okay",                                                          /*Sets the name of the negative button*/
                         new DialogInterface.OnClickListener() {                                     /*Creates the on click listener service*/
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();                                                    /*Cancels the dialog box*/
@@ -478,8 +478,9 @@ public class MainActivity extends ActionBarActivity {                           
      * Updates the pin in the left when the user has succesfully completed a task
      *
      * @param pinName   The number on the pin that sould be changed corresponds to the pinName
+     * @param color     true = green, false = red
      */
-    void updatePin(final int pinName) {
+    void updatePin(final int pinName, final boolean color) {
         final ImageView[] pin = {null};
 
         if (pinName == 1)
@@ -504,16 +505,32 @@ public class MainActivity extends ActionBarActivity {                           
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if (pinName == 1)
-                    pin[0].setImageResource(R.mipmap.onegreen);
-                else if (pinName == 2)
-                    pin[0].setImageResource(R.mipmap.twogreen);
-                else if (pinName == 3)
-                    pin[0].setImageResource(R.mipmap.threegreen);
-                else if (pinName == 4)
-                    pin[0].setImageResource(R.mipmap.fourgreen);
 
-                pin[0].startAnimation(textIn);
+                if (color == true) {
+                    if (pinName == 1)
+                        pin[0].setImageResource(R.mipmap.onegreen);
+                    else if (pinName == 2)
+                        pin[0].setImageResource(R.mipmap.twogreen);
+                    else if (pinName == 3)
+                        pin[0].setImageResource(R.mipmap.threegreen);
+                    else if (pinName == 4)
+                        pin[0].setImageResource(R.mipmap.fourgreen);
+
+                    pin[0].startAnimation(textIn);
+                }
+
+                if (color == false) {
+                    if (pinName == 1)
+                        pin[0].setImageResource(R.mipmap.onered);
+                    else if (pinName == 2)
+                        pin[0].setImageResource(R.mipmap.twored);
+                    else if (pinName == 3)
+                        pin[0].setImageResource(R.mipmap.threered);
+                    else if (pinName == 4)
+                        pin[0].setImageResource(R.mipmap.fourred);
+
+                    pin[0].startAnimation(textIn);
+                }
             }
 
             @Override
