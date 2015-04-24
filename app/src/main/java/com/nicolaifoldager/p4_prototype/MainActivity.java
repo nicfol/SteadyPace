@@ -197,10 +197,10 @@ public class MainActivity extends ActionBarActivity {                           
                         e.printStackTrace(System.out);
                     }
 
-                    if(audioMode.equals("cont")) {
+                    if(audioMode[0].equals("cont")) {
                         //Cont sound
                         Log.i("--------------------","1 cont");
-                    } else if (audioMode.equals("disc")) {
+                    } else if (audioMode[0].equals("disc")) {
                         //Discrete sound
                         Log.i("--------------------","2 disc");
                     } else {
@@ -263,7 +263,9 @@ public class MainActivity extends ActionBarActivity {                           
                             prefsReader.readLine();                                                 /*Skip the first line*/
                             prefsReader.readLine();                                                 /*Skipe the second line*/
                             String prefsBPM = prefsReader.readLine();                               /*Set the third line to string prefsBPM*/
-                            prefsBPMdouble[0] = Double.parseDouble(prefsBPM);                       /*parse it to a double*/
+
+                            //TODO FIX THIS LINE, SHIT DOESN'T WORK, FUCK YOU MIKKEL I H8 U SK8 BOI
+                            //prefsBPMdouble[0] = Double.parseDouble(prefsBPM);                       /*parse it to a double*/
                         } catch (Exception e) {
                             Toast.makeText(getApplicationContext(), "Couldn't read preferences," +
                                             " please try again", Toast.LENGTH_LONG).show();
@@ -292,7 +294,7 @@ public class MainActivity extends ActionBarActivity {                           
 
                         avgSpeed[0] = totalSpeed[0] / iterations[0];                                /*Calculate average speed in meters per second*/
 
-                        double BPM = (avgSpeed[0] * 60) / (stepLength[0] / 100);                    /*speed in meters pr second devided by steplenth in cm times 100 equals BPM*/
+                        double BPM = (avgSpeed[0] * 60) / (stepLength[0] / 100);                    /*speed in meters pr second divided by step length in cm times 100 to convert to meters equals BPM*/
 
                         try {
                             prefsLog.write("\n" + BPM);                                             /*Write BPM to the prefs.txt*/
