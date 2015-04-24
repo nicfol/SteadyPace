@@ -51,7 +51,9 @@ import org.puredata.android.utils.PdUiDispatcher;
 import org.puredata.core.PdBase;
 import org.puredata.core.utils.IoUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 //-------------------------------- LIBRARIES ABOVE -----------------------------------------------//
@@ -120,9 +122,10 @@ public class MainActivity extends ActionBarActivity {                           
         final String[] userId = {"0"};                                                              /*Stores the userID*/
         final String[] fileName = {null};                                                           /*Saves the filename*/
         final double[] stepLength = {0.0};
+        final double[] prefsBPMdouble = {0};
 
-        final String folderName = Environment.getExternalStorageDirectory().toString()+
-                "/Android/data/com.nicolaifoldager.p4_prototype/";                                  /*Specify the path to the file directory we will save to*/
+        final String[] folderName = {Environment.getExternalStorageDirectory().toString()+
+                "/Android/data/com.nicolaifoldager.p4_prototype/"};                                  /*Specify the path to the file directory we will save to*/
 
 
         final LocationManager locationManager = (LocationManager) this.getSystemService
@@ -147,8 +150,8 @@ public class MainActivity extends ActionBarActivity {                           
 //--------------------------------------- INIT BELOW ---------------------------------------------//
 
         if(media.rwAccess()) {
-            media.createFolder(folderName);                                                         /*Checks if a folder is created, if not it will create one.*/
-            Media.createPrefs(folderName);                                                          /*Checks if a preferences file has been created, if not it makes one and assigns a user ID and mode*/
+            media.createFolder(folderName[0]);                                                      /*Checks if a folder is created, if not it will create one.*/
+            Media.createPrefs(folderName[0]);                                                       /*Checks if a preferences file has been created, if not it makes one and assigns a user ID and mode*/
 
             userId[0] = Media.getId();                                                              /*Gets the ID from the Media class that reads prefs.txt*/
             audioMode[0] = Media.getMode();                                                         /*Gets the audio mode from the Media class that reads prefs.txt*/
@@ -252,6 +255,23 @@ public class MainActivity extends ActionBarActivity {                           
                     checkGPS();
                     switchLogging.toggle();
                 } else if (switchLogging.isChecked()) {                                             /*If the switch is already checked then run the scope*/
+
+                    if (rBtnSound.isChecked()) {
+                        try {
+                            BufferedReader prefsReader = new BufferedReader(new FileReader
+                                    (folderName[0] + "prefs.txt"));                                 /*Start a filereader from prefs.txt to see get the BPM*/
+                            prefsReader.readLine();                                                 /*Skip the first line*/
+                            prefsReader.readLine();                                                 /*Skipe the second line*/
+                            String prefsBPM = prefsReader.readLine();                               /*Set the third line to string prefsBPM*/
+                            prefsBPMdouble[0] = Double.parseDouble(prefsBPM);                       /*parse it to a double*/
+                        } catch (Exception e) {
+                            Toast.makeText(getApplicationContext(), "Couldn't read preferences," +
+                                            " please try again", Toast.LENGTH_LONG).show();
+                            switchLogging.toggle();                                                 /*Toggle the switch back due to the error*/
+                            e.printStackTrace(System.out);
+                        }
+                    }
+
                     startAudio();                                                                   /*Starts the audio feedback*/
                     Log.i("Main/Logging listener", "on / logging");
 
@@ -268,7 +288,7 @@ public class MainActivity extends ActionBarActivity {                           
 
                     if(rBtnNoSound.isChecked()) {                                                   /*Check if no sound feedback has been used*/
                         Logging prefsLog = new Logging();                                           /*Construct a new filewriter to the prefs.txt file*/
-                        prefsLog.startWriter(folderName, "prefs.txt");                              /*Starts the filewriter*/
+                        prefsLog.startWriter(folderName[0], "prefs.txt");                           /*Starts the filewriter*/
 
                         avgSpeed[0] = totalSpeed[0] / iterations[0];                                /*Calculate average speed in meters per second*/
 
@@ -279,9 +299,6 @@ public class MainActivity extends ActionBarActivity {                           
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
-                    } else if (rBtnSound.isChecked()) {
-                        
                     }
 
                     stopAudio();                                                                    /*Stops the audio feedback*/
@@ -354,8 +371,8 @@ public class MainActivity extends ActionBarActivity {                           
                         fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" +
                                 String.valueOf(System.currentTimeMillis() + ".txt");
 
-                        Media.createFile(folderName, fileName[0]);                                  /*Creates a new file with the name of fileName[0] and location of folderName*/
-                        Logging.startWriter(folderName, fileName[0]);                               /*Starts a writer to the file in folderName/fileName[0]*/
+                        Media.createFile(folderName[0], fileName[0]);                                  /*Creates a new file with the name of fileName[0] and location of folderName*/
+                        Logging.startWriter(folderName[0], fileName[0]);                               /*Starts a writer to the file in folderName/fileName[0]*/
 
                         updatePin(3);                                                               /*Makes pin 4 green*/
                     }
