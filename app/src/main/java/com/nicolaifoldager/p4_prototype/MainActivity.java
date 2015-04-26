@@ -16,9 +16,7 @@
  */
 
 
-package com.nicolaifoldager.p4_prototype;                                                           /*Package signature*/
-
-//-------------------------------- LIBRARIES BELOW -----------------------------------------------//
+package com.nicolaifoldager.p4_prototype;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -28,10 +26,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -54,44 +52,34 @@ import org.puredata.core.utils.IoUtils;
 import java.io.File;
 import java.io.IOException;
 
-//-------------------------------- LIBRARIES ABOVE -----------------------------------------------//
 
+public class MainActivity extends ActionBarActivity {
 
-//-------------------------------- ACTIVITY INIT BELOW -------------------------------------------//
-
-public class MainActivity extends ActionBarActivity {                                               /*Extends this ActionBarActivity into our MainActivity. This shows the black bar in the top*/
-
-    AsyncTask uploadFiles;                                                                  /*AsyncTask for file upload on another thread*/
-    private PdUiDispatcher dispatcher;                                                              /*PD dispatcher for audio control*/
+    /**     Wakelock                                                                              */
     PowerManager.WakeLock mWakeLock = null;                                                         /*Wakelock to keep the cpu running while screen is off during a session*/
 
+    /**     PD patch dispatcher                                                                   */
+    private PdUiDispatcher dispatcher;                                                              /*PD dispatcher for audio control*/
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {                                            /*Runs when the activity is created*/
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
 
-    //------------------------------------------////
-    //-------------- DON'T TOUCH ---------------////
-        super.onCreate(savedInstanceState);     ////                                                /*Loads a previous instance state if there is one*/
-        setContentView(R.layout.activity_main); ////                                                /*Calls the layout file -> res/layout/activity_main.xml*/
-    //-------------- DON'T TOUCH ---------------////
-    //------------------------------------------////
-
-
-//-------------------------------- ANDROID INIT ABOVE --------------------------------------------//
-
-
-//------------------------------------ WAKELOCK BELOW --------------------------------------------//
-
+        /**     Wakelock                                                                          */
         final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);             /*Construct a new PowerManager to call from the power service within Android OS*/
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 MainActivity.class.getSimpleName());                                                /*Construct a new partial wakelock to keep the CPU running when the screen is of*/
 
-//------------------------------------ WAKELOCK ABOVE --------------------------------------------//
+        /**     Location Manager                                                                  */
+        final LocationManager[] locationManager = {(LocationManager) this.getSystemService
+                (Context.LOCATION_SERVICE)};                                                         /*Construction a LocationManager to call for the location_service in android*/
 
+        /**     Asynchronized task                                                                */
+        final AsyncTask[] uploadFiles = new AsyncTask[1];                                                                  /*AsyncTask for file upload on another thread*/
 
-//-------------------------------- VARIABLES & CONSTRUCTORS BELOW --------------------------------//
-
-        //Call the elements in the UI for onClickListeners
+        /**     Call the elements in the UI                                                       */
         final Switch switchLogging = (Switch) findViewById(R.id.switchStartLogging);                /*Logging Switch*/
         final Button createFileBtn = (Button) findViewById(R.id.createFile);                        /*Create new file button*/
         final Button setStepLengthBtn = (Button) findViewById(R.id.setStepLengthBtn);
@@ -101,79 +89,147 @@ public class MainActivity extends ActionBarActivity {                           
         final RadioButton rBtnNoSound = (RadioButton) findViewById(R.id.rBtnNoSound);               /*Radiobutton for no sound audio mode*/
         final RadioButton rBtnSound = (RadioButton) findViewById(R.id.rBtnSound);                   /*Radiobutton for sound audio mode*/
 
-        final EditText stepLengthTxt = (EditText) findViewById(R.id.stepLengthField);               /*Textfield to input steplength into*/
+        final EditText stepLengthTxt = (EditText) findViewById(R.id.stepLengthField);               /*Textfield to input step length into*/
         stepLengthTxt.setGravity(Gravity.CENTER);                                                   /*Center it cause sparkles*/
 
-        /**
-         * The variables are set as zero-index arrays so we can manipulate them despite them being
-         * declared as final.
-         *
-         * Read more here:
-         * https://stackoverflow.com/questions/10166521/the-final-local-variable-cannot-be-assigned
-         */
 
-        final double[] totalSpeed = {0.0};                                                          /*Total speed, used to calc average speed*/
-        final double[] iterations = {1.0};                                                          /*How many times the location manager have updated the speed (How many entries we have in the log file)*/
-        final double[] avgSpeed = {0.0};
+        /**     Variables                                                                         */
+        final String userID[] = {null};
+        final String audioMode[] = {null};
+        final float BPM[] = {0.0f};
+        final int[] stepLength = {0};
 
-        final String[] audioMode = {null};                                                          /*Stores the audioMode*/
-        final String[] userId = {"0"};                                                              /*Stores the userID*/
-        final String[] fileName = {null};                                                           /*Saves the filename*/
-        final double[] stepLength = {0.0};
-        final double[] prefsBPMdouble = {0};
-        final double[] BPM = {0.0};
+        final float[] totalSpeed = {0.0f};                                                          /*Total speed, used to calc average speed*/
+        final float[] iterations = {1.0f};                                                          /*How many times the location manager have updated the speed (How many entries we have in the log file)*/
+        final float[] avgSpeed = {0.0f};
 
+        final String[] fileName = {null};
         final String[] folderName = {Environment.getExternalStorageDirectory().toString()+
-                "/Android/data/com.nicolaifoldager.p4_prototype/"};                                  /*Specify the path to the file directory we will save to*/
+                "/Android/data/com.nicolaifoldager.p4_prototype/"};                                 /*Specify the path to the file directory we will save to*/
 
 
-        final LocationManager locationManager = (LocationManager) this.getSystemService
-                (Context.LOCATION_SERVICE);                                                         /*Construction a LocationManager to call for the location_service in android*/
-
-        //Construct classes - Why global? Cause garbage collection <3
+        /**     Initialization                                                                    */
         final Media media = new Media();
-        final Logging logWriter = new Logging();
+        final Logging logging = new Logging();
 
-//-------------------------------- VARIABLES & CONSTRUCTORS ABOVE --------------------------------//
-
-
-//---------------------------------------- INIT PD BELOW -----------------------------------------//
-
-        //Initializes the PD library and opens an sound output
-            init_pd();
-            loadPdPatch();
-
-//---------------------------------------- INIT PD ABOVE -----------------------------------------//
-
-
-//--------------------------------------- INIT BELOW ---------------------------------------------//
-
-        if(media.rwAccess()) {
-            media.createFolder(folderName[0]);                                                      /*Checks if a folder is created, if not it will create one.*/
-            Media.createPrefs(folderName[0]);                                                       /*Checks if a preferences file has been created, if not it makes one and assigns a user ID and mode*/
-
-            userId[0] = Media.getId();                                                              /*Gets the ID from the Media class that reads prefs.txt*/
-            audioMode[0] = Media.getMode();                                                         /*Gets the audio mode from the Media class that reads prefs.txt*/
-
-            fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" +
-                    String.valueOf(System.currentTimeMillis()) + ".txt";                            /*Stores the filename for the current session in a string.*/
-
-        } else {
-            Toast.makeText(getApplicationContext(), "Read/write access not granted. Folder has " +
-                    "not been created!", Toast.LENGTH_LONG).show();
+        if (!media.folderExists(folderName[0])) {
+            media.createFolder(folderName[0]);
         }
 
-        checkGPS();                                                                                 /*Runs the method to check if GPS is enabled*/
+        checkGPS();
 
-//--------------------------------------- INIT ABOVE ---------------------------------------------//
+        if(media.prefsExists(folderName[0])) {
+            userID[0] = media.getUserID(folderName[0]);
+            audioMode[0] = media.getAudioMode(folderName[0]);
+            BPM[0] = media.getBPM(folderName[0]);
+            System.out.println("Prefs does exist: - ID: " + userID[0] + " Audio: " + audioMode[0] + " BPM: " + BPM[0]);
+            rBtnSound.toggle();
+            updatePin(2, true);
+            rBtnNoSound.setEnabled(false);
+        } else {
+            userID[0] = media.createUserID();
+            audioMode[0] = media.createAudioMode(folderName[0]);
+            System.out.println("Prefs does not exist: - ID: " + userID[0] + " Audio: " + audioMode[0] + " BPM: " + BPM[0]);
+            rBtnNoSound.toggle();
+            updatePin(2, true);
+            rBtnSound.setEnabled(false);
+        }
 
 
-//-------------------------------- LOCATION LISTENER BELOW ---------------------------------------//
+        /**     Create new session button                                                         */
+        createFileBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(switchLogging.isChecked()) {
+                    Toast.makeText(getApplicationContext(), "Please stop logging before " +
+                                    "starting a new session",
+                            Toast.LENGTH_LONG).show();
+                } else if(stepLength[0] == 0) {
+                    Toast.makeText(getApplicationContext(), "Please set your step length",
+                            Toast.LENGTH_LONG).show();
+                } else if(!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {
+                    Toast.makeText(getApplicationContext(), "Please choose a sound feedback mode",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    fileName[0] = String.valueOf(userID[0]) + "_" + audioMode[0] + "_" +
+                            String.valueOf(System.currentTimeMillis() + ".txt");
 
-        //Construct a listener that checks for changes in the location service in Android
+                    media.createFile(folderName[0], fileName[0]);
+                    logging.startWriter(folderName[0], fileName[0]);
+
+                    updatePin(3, true);
+                }
+            }
+        });
+
+
+        /**     Start session                                                                     */
+        switchLogging.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!checkGPS()) {
+                    Toast.makeText(getApplicationContext(), "Please turn on the GPS",
+                            Toast.LENGTH_LONG).show();
+                    switchLogging.toggle();
+                } else if(stepLength[0] == 0) {
+                    Toast.makeText(getApplicationContext(), "Please set your step length",
+                            Toast.LENGTH_LONG).show();
+                    switchLogging.toggle();
+                } else if(fileName[0] == null) {
+                    Toast.makeText(getApplicationContext(), "Please start a new session",
+                            Toast.LENGTH_LONG).show();
+                    switchLogging.toggle();
+                } else if(!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {
+                    Toast.makeText(getApplicationContext(), "Please select an audio mode",
+                            Toast.LENGTH_LONG).show();
+                    switchLogging.toggle();
+                } else if(switchLogging.isChecked()) {
+                    updatePin(4, true);
+                    Log.i("Main/Logging listener", "on / logging");
+
+                    //Disables the controls
+                    setStepLengthBtn.setEnabled(false);
+                    createFileBtn.setEnabled(false);
+                    stepLengthTxt.setFocusable(false);
+
+                    mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
+
+                } else {
+                    Log.i("Main/Logging listener", "off / not logging");
+
+                    //TODO CALCULATE BPM HERE
+
+                    logging.stopWriter("");
+
+                    if(rBtnNoSound.isChecked()) {
+                        Media prefsMedia = new Media();
+                        Logging prefsLogging = new Logging();
+
+                        prefsMedia.createFile(folderName[0], "prefs.txt");
+                        prefsLogging.startWriter(folderName[0], "prefs.txt");
+                        prefsLogging.stopWriter(userID[0] + "\n" + audioMode[0] + "\n" + BPM[0]);
+                    }
+
+                    showUploadDialog();                                                             /*Shows a dialog that the application is trying to upload*/
+                    uploadFiles[0] = new uploadFiles().execute(fileName[0]);                        /*Start the upload*/
+
+                    for(int i = 1; i <= 4; i++) {
+                        updatePin(i, false);                                                        /*Set pins to red again*/
+                    }
+
+                    //Enables the controls
+                    setStepLengthBtn.setEnabled(true);
+                    createFileBtn.setEnabled(true);
+                    stepLengthTxt.setFocusable(true);
+
+                }
+            }
+        });
+
+        /**     Location Manager                                                                  */
         LocationListener locationListener = new LocationListener() {
-
-            public void onLocationChanged(Location location) {                                      /*Run on location changed or update request*/
+            @Override
+            public void onLocationChanged(Location location) {
 
                 float accuracy = location.getAccuracy();                                            /*Get the current accuracy from the location manager in meters*/
 
@@ -186,32 +242,17 @@ public class MainActivity extends ActionBarActivity {                           
                     try {
                         String msg = iterations[0] + "\t" + speedMPS + "\t" + accuracy + "\t\t"
                                 + iterations[0] + "," + getLat + "," + getLon + "\n";
-                        logWriter.write(msg);                                                       /*Write the string endMsg to the FileWriter*/
-                        totalSpeed[0] += speedMPS;                                                  /*Add the current speed to total speed*/
-                        System.out.println("Speed m/s: " + speedMPS + " - Total speed: " +totalSpeed[0]);
-                        iterations[0] += 1;                                                         /*Add 1 to the iteration counter*/
+                        logging.write(msg);
+
+                        totalSpeed[0] += speedMPS;
+                        iterations[0] += 1;
                     } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), e.getMessage(),
-                                Toast.LENGTH_LONG).show();
                         e.printStackTrace(System.out);
                     }
 
-                    if(audioMode[0].equals("cont")) {
-                        //Cont sound
-                        Log.i("--------------------","1 cont");
+                }
 
-                    } else if (audioMode[0].equals("disc")) {
-                        //Discrete sound
-                        Log.i("--------------------","2 disc");
-
-                    } else {
-                        //No sound
-                        Log.i("--------------------","3 no sound");
-
-                    }
-
-                    }//If switchLogging is checked
-            }//onLocationChanged
+            }
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {               /*If the provider status has changed*/
@@ -231,225 +272,46 @@ public class MainActivity extends ActionBarActivity {                           
 
         final int minUpdateTime = 1000;                                                             /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
         final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
+        locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
                 minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
 
-//-------------------------------- LOCATION LISTENER ABOVE ---------------------------------------//
 
-
-//-------------------------------- LOGGING  SWITCH BELOW -----------------------------------------//
-
-        //Logging switch
-        switchLogging.setOnClickListener(new View.OnClickListener() {                               /*Create a listener service that checks if the switch that controls the logging is pressed*/
-            public void onClick(View v) {
-
-                if(fileName[0] == null) {                                                           /*Checks if a file has been created, if not then it'll toast an error*/
-                    Toast.makeText(getApplicationContext(), "Please start a new session",
-                            Toast.LENGTH_LONG).show();
-
-                    switchLogging.toggle();                                                         /*Toggles the switch back to off state*/
-                } else if (!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {                    /*Checks if a file has been created, if not then it'll toast an error*/
-                    Toast.makeText(getApplicationContext(), "Please select an audio mode",
-                            Toast.LENGTH_LONG).show();
-
-                    switchLogging.toggle();
-                } else if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    checkGPS();
-                    switchLogging.toggle();
-                } else if (switchLogging.isChecked()) {                                             /*If the switch is already checked then run the scope*/
-
-                    BPM[0] = Double.parseDouble(Media.getBPM());
-
-                    System.out.println("------------------------------BPM: " + BPM[0]);
-                    startAudio();                                                                   /*Starts the audio feedback*/
-
-                    Log.i("Main/Logging listener", "on / logging");
-
-                    //Disables the controls
-                    setStepLengthBtn.setEnabled(false);
-                    rBtnNoSound.setEnabled(false);
-                    rBtnSound.setEnabled(false);
-                    createFileBtn.setEnabled(false);
-                    stepLengthTxt.setFocusable(false);
-
-                    mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
-                    updatePin(4, true);                                                             /*Makes pin 4 green*/
-                } else {
-
-                    for(int i = 1; i <= 4; i++) {
-                        updatePin(i, false);                                                        /*Set pins to red again*/
-                    }
-
-                    if(rBtnNoSound.isChecked() /* && iterations[0] < 300*/ ) {                      /*Check if no sound feedback has been used*/
-                        Logging prefsLog = new Logging();                                           /*Construct a new filewriter to the prefs.txt file*/
-                        Media medLog = new Media();                                                 /*Construct a new Media class to create a new file*/
-
-                        String bpmFileName = "bpm.txt";                                             /*Name of the file that BPM is stored in*/
-                        medLog.createFile(folderName[0], bpmFileName);                              /*createa a new file with bpmFileName*/
-                        prefsLog.startWriter(folderName[0], bpmFileName);                           /*Starts the filewriter*/
-
-                        iterations[0] = iterations[0] - 1;
-                        avgSpeed[0] = totalSpeed[0] / iterations[0];                                /*Calculate average speed in meters per second*/
-
-                        System.out.println("----------------------------avgSpeed " + totalSpeed[0] + " " + iterations[0] + " = " + avgSpeed[0]);
-
-                        double BPM = (avgSpeed[0] * 60) / (stepLength[0] / 100);                    /*speed in meters pr second divided by step length in cm times 100 to convert to meters equals BPM*/
-                        System.out.println("----------------------------BMP " + BPM);
-
-                        try {
-                            prefsLog.write("" + BPM);                                               /*Write BPM to the prefs.txt*/
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    stopAudio();                                                                    /*Stops the audio feedback*/
-                    Log.i("Main/Logging listener", "off / not logging");
-
-                    //Enables the controls
-                    setStepLengthBtn.setEnabled(true);
-                    rBtnNoSound.setEnabled(true);
-                    rBtnSound.setEnabled(true);
-                    createFileBtn.setEnabled(true);
-                    stepLengthTxt.setFocusable(true);
-
-                    try {
-                        logWriter.stopWriter("");                                                   /*Stops the filewriter*/
-                    } catch (IOException e) {
-                        e.printStackTrace(System.out);
-                    }
-
-                    showUploadDialog();                                                             /*Shows a dialog that the application is trying to upload*/
-                    uploadFiles = new uploadFiles().execute(fileName[0]);                           /*Start the upload*/
-
-                    /*
-                     * Reset average speed % iteration counter to 0 if they're not.
-                     * It also sets the current file name to null, this is to make
-                     * sure we don't write to the same file twice.
-                     */
-                    if(avgSpeed[0] != 0.0 || iterations[0] != 0.0 || fileName[0] != null) {
-                        avgSpeed[0] = 0.0;
-                        iterations[0] = 1.0;
-                        fileName[0] = null;
-                        Log.i("Main/Logging listener", "Iterations: " + iterations[0] +
-                                " Average Speed: " + avgSpeed[0] + " Current filename: "
-                                + fileName[0]);
-                    }
-
-                    if (mWakeLock.isHeld()) {                                                       /*Check if a wakelock is held*/
-                        mWakeLock.release();                                                        /*Release it so it won't drain battery*/
-                        mWakeLock.acquire(120000);                                                  /*Start a new wakelock with a timeout of 2 minutes to ensure that the logfile will be uploaded*/
-                    }
-                }
-            }
-        });
-
-//-------------------------------- END LOGGING ABOVE ---------------------------------------------//
-
-
-//-------------------------------- FILE CREATION BELOW -------------------------------------------//
-
-            createFileBtn.setOnClickListener(new View.OnClickListener() {                           /*Create a listener service that checks if the button that creates a new file has been pressed*/
-                @Override
-                public void onClick(View v) {
-
-                    if(switchLogging.isChecked()) {
-                        String toastMsg = "Please stop logging before starting a new session";
-                        Toast.makeText(getApplicationContext(), toastMsg,
-                                Toast.LENGTH_LONG).show();
-                    } else if(stepLength[0] == 0.0) {
-                        String toastMsg = "Please set your step length";
-                        Toast.makeText(getApplicationContext(), toastMsg,
-                                Toast.LENGTH_LONG).show();
-
-                    } else if(!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {
-                        String toastMsg = "Please set the feedback mode";
-                        Toast.makeText(getApplicationContext(), toastMsg,
-                                Toast.LENGTH_LONG).show();
-                    } else {
-                        userId[0] = Media.getId();                                                  /*Calls the user ID from the media class*/
-                        audioMode[0] = Media.getMode();                                             /*Calls the audio mode from the media class*/
-
-                        fileName[0] = String.valueOf(userId[0]) + "_" + audioMode[0] + "_" +
-                                String.valueOf(System.currentTimeMillis() + ".txt");
-
-                        Media.createFile(folderName[0], fileName[0]);                               /*Creates a new file with the name of fileName[0] and location of folderName*/
-                        Logging.startWriter(folderName[0], fileName[0]);                            /*Starts a writer to the file in folderName/fileName[0]*/
-
-                        updatePin(3, true);                                                         /*Makes pin 4 green*/
-                    }
-
-                }
-
-            });
-
-
-        /*
-         * Anonymous listener to see if the set step length button has been pressed. if it have then
-         * check to see if the input is an integer, if it isn't then toast, else then update the
-         * pin.
-         */
+        /**     Listener for set step length button                                               */
         setStepLengthBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                    try {
-                        stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());        /*Calls the value stored in the text field and saves it to a String*/
-                        updatePin(1, true);                                                         /*Update the pin on the activity*/
-                    } catch (NumberFormatException e) {
-                        Toast.makeText(getApplicationContext(), "Please only use " +
-                                        "numbers and specify the length in meters, e.g. 65",
-                                Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
-
-            }
-
-        });
-
-        /*
-         * Anonymous listener to see if either of he radio buttons has been checked, if hey have
-         *  then update the pin.
-         */
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-        {
-            boolean hasChanged = false;
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId)
-            {
-                if(!hasChanged) {
-                    hasChanged = true;
-                    updatePin(2, true);                                                                   /*Makes pin 4 green*/
+                try {
+                    stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());            /*Calls the value stored in the text field and saves it to a String*/
+                    updatePin(1, true);                                                             /*Update the pin on the activity*/
+                } catch (NumberFormatException e) {
+                    Toast.makeText(getApplicationContext(), "Please only use " +
+                                    "numbers and specify the length in meters, e.g. 65",
+                            Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
                 }
             }
         });
 
-//-------------------------------- FILE CREATION ABOVE -------------------------------------------//
+        /**     Listener for changes in the radio buttons                                         */
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            boolean hasChanged = false;
 
-    }//On create
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (!hasChanged) {
+                    hasChanged = true;
+                    updatePin(2, true);                                                             /*Makes pin 4 green*/
+                }
+            }
+        });
 
-     /**
-     * Shows the dialog that tells the user, that the upload is doing stuff
-     */
-    public void showUploadDialog() {
-        AlertDialog.Builder alertDialogUpload = new AlertDialog.Builder(this);                      /*Construct a new dialog box*/
-        alertDialogUpload.setMessage("Uploading file")                                              /*Sets the message in the dialog box*/
-                .setNegativeButton("Okay",                                                          /*Sets the name of the negative button*/
-                        new DialogInterface.OnClickListener() {                                     /*Creates the on click listener service*/
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();                                                    /*Cancels the dialog box*/
-                            }
-                        });
-        AlertDialog alert = alertDialogUpload.create();                                             /*Constructs the dialog*/
-        alert.show();                                                                               /*Shows the dialog box*/
-    }
+    } // onCreate
 
     /**
      * Check is GPS is enabled, if not alert the user and redirect them to the location settings
      * within Android OS
      */
-    void checkGPS() {
-
+    private boolean checkGPS() {
         LocationManager manager = (LocationManager) this.getSystemService
                 (Context.LOCATION_SERVICE);                                                         /*Construct a new LocationManager to check the GPS provider*/
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {                             /*Check if the location provider is the GPS*/
@@ -459,7 +321,7 @@ public class MainActivity extends ActionBarActivity {                           
                             new DialogInterface.OnClickListener() {                                 /*Creates the on click listener service*/
                                 public void onClick(DialogInterface dialog, int id) {
                                     Intent callGPSSettingIntent = new Intent(
-                                       android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);  /*Links to the location service settings within Android OS*/
+                                            android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);  /*Links to the location service settings within Android OS*/
                                     startActivity(callGPSSettingIntent);                            /*Starts the activity and opens location settings*/
                                 }
                             });
@@ -471,6 +333,9 @@ public class MainActivity extends ActionBarActivity {                           
                     });
             AlertDialog alert = alertDialogBuilder.create();                                        /*Constructs the dialog*/
             alert.show();                                                                           /*Shows the dialog box*/
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -480,7 +345,7 @@ public class MainActivity extends ActionBarActivity {                           
      * @param pinName   The number on the pin that sould be changed corresponds to the pinName
      * @param color     true = green, false = red
      */
-    void updatePin(final int pinName, final boolean color) {
+    private void updatePin(final int pinName, final boolean color) {
         final ImageView[] pin = {null};
 
         if (pinName == 1)
@@ -538,7 +403,23 @@ public class MainActivity extends ActionBarActivity {                           
         });
     }
 
-     /**
+    /**
+     * Shows the dialog that tells the user, that the upload is doing stuff
+     */
+    private void showUploadDialog() {
+        AlertDialog.Builder alertDialogUpload = new AlertDialog.Builder(this);                      /*Construct a new dialog box*/
+        alertDialogUpload.setMessage("Uploading file")                                              /*Sets the message in the dialog box*/
+                .setNegativeButton("Okay",                                                          /*Sets the name of the negative button*/
+                        new DialogInterface.OnClickListener() {                                     /*Creates the on click listener service*/
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();                                                    /*Cancels the dialog box*/
+                            }
+                        });
+        AlertDialog alert = alertDialogUpload.create();                                             /*Constructs the dialog*/
+        alert.show();                                                                               /*Shows the dialog box*/
+    }
+
+    /**
      * Initializes PD Library and prepares the audio outlet.
      */
     public void init_pd() {
@@ -601,5 +482,4 @@ public class MainActivity extends ActionBarActivity {                           
      */
     public void stopAudio() { PdAudio.stopAudio(); }
 
-
-} //MainActivity
+} // Main

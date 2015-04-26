@@ -51,7 +51,7 @@ public class Logging {
      * @param content       iterations, avg. speed and time logging in seconds.
      * @throws IOException
      */
-    static void stopWriter(String content) throws IOException {
+    static void stopWriter(String content) {
 
         try {
             write(content);                                                                         /*Writes a final String to the log*/
@@ -65,3 +65,4 @@ public class Logging {
 
     }
 }
+
