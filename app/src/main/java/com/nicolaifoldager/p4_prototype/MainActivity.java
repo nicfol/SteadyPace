@@ -61,7 +61,7 @@ import java.io.IOException;
 
 public class MainActivity extends ActionBarActivity {                                               /*Extends this ActionBarActivity into our MainActivity. This shows the black bar in the top*/
 
-    private AsyncTask uploadFiles;                                                                  /*AsyncTask for file upload on another thread*/
+    AsyncTask uploadFiles;                                                                  /*AsyncTask for file upload on another thread*/
     private PdUiDispatcher dispatcher;                                                              /*PD dispatcher for audio control*/
     PowerManager.WakeLock mWakeLock = null;                                                         /*Wakelock to keep the cpu running while screen is off during a session*/
 
@@ -71,8 +71,8 @@ public class MainActivity extends ActionBarActivity {                           
 
     //------------------------------------------////
     //-------------- DON'T TOUCH ---------------////
-        super.onCreate(savedInstanceState);     ////
-        setContentView(R.layout.activity_main); ////
+        super.onCreate(savedInstanceState);     ////                                                /*Loads a previous instance state if there is one*/
+        setContentView(R.layout.activity_main); ////                                                /*Calls the layout file -> res/layout/activity_main.xml*/
     //-------------- DON'T TOUCH ---------------////
     //------------------------------------------////
 
@@ -277,10 +277,10 @@ public class MainActivity extends ActionBarActivity {                           
                 } else {
 
                     for(int i = 1; i <= 4; i++) {
-                        updatePin(i, false);
+                        updatePin(i, false);                                                        /*Set pins to red again*/
                     }
 
-                    if(rBtnNoSound.isChecked() /* && iterations[0] <300*/ ) {                        /*Check if no sound feedback has been used*/
+                    if(rBtnNoSound.isChecked() /* && iterations[0] < 300*/ ) {                      /*Check if no sound feedback has been used*/
                         Logging prefsLog = new Logging();                                           /*Construct a new filewriter to the prefs.txt file*/
                         Media medLog = new Media();                                                 /*Construct a new Media class to create a new file*/
 
@@ -587,27 +587,19 @@ public class MainActivity extends ActionBarActivity {                           
      * @param value     The value to send to the receiver as a float
      */
     public void floatToPd(String receiver, Float value) {
-
         PdBase.sendFloat(receiver, value);
         Log.i("MainActivity/floatToPd", "Send " + value + " to " + receiver);
-
     }
 
     /**
      * Starts the audio
      */
-    public void startAudio() {
-
-        PdAudio.startAudio(this);
-    }
+    public void startAudio() { PdAudio.startAudio(this); }
 
     /**
      * Stop the audio
      */
-    public void stopAudio() {
-
-        PdAudio.stopAudio();
-    }
+    public void stopAudio() { PdAudio.stopAudio(); }
 
 
 } //MainActivity

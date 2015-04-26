@@ -19,7 +19,7 @@ public class Media {
 
     private static String[] deviceIdGlobal = {"0"};
     private static String[] modeGlobal = {"NOTSET"};
-    private static String[] BPMglobal ={"NOTSET"};
+    private static String[] BPMglobal = {"NOTSET"};
 
     /**
      * Checks if the applications has read/write access to the external storage (SD-Card). On phones

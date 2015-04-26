@@ -47,7 +47,8 @@ public class Logging {
 
     /**
      * Stops the FileWriter initialized when the class is constructed.
-     *                      iterations, avg. speed and time logging in seconds.
+     *
+     * @param content       iterations, avg. speed and time logging in seconds.
      * @throws IOException
      */
     static void stopWriter(String content) throws IOException {
