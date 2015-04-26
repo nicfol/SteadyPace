@@ -137,7 +137,7 @@ public class Media {
      * @param filename  filename that is going to be uploaded in string without directory but with
      *                  file extension.
      */
-    static String uploadFTP(final String filename) {
+    String uploadFTP(final String filename) {
 
         if (!result) {
             try {

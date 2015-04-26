@@ -35,6 +35,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -59,7 +60,11 @@ public class MainActivity extends ActionBarActivity {
     PowerManager.WakeLock mWakeLock = null;                                                         /*Wakelock to keep the cpu running while screen is off during a session*/
 
     /**     PD patch dispatcher                                                                   */
-    private PdUiDispatcher dispatcher;                                                              /*PD dispatcher for audio control*/
+    PdUiDispatcher dispatcher;                                                              /*PD dispatcher for audio control*/
+
+
+    /**     Construct Logging class                                                               */
+    final Logging logging = new Logging();                                                          /*Constructed globally so it can be closed when the application is closed by onDestroy(); Read more: https://developer.android.com/reference/android/app/Activity.html*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +81,10 @@ public class MainActivity extends ActionBarActivity {
         final LocationManager[] locationManager = {(LocationManager) this.getSystemService
                 (Context.LOCATION_SERVICE)};                                                         /*Construction a LocationManager to call for the location_service in android*/
 
+        /**     PD Init                                                                           */
+        init_pd();
+        loadPdPatch();
+
         /**     Asynchronized task                                                                */
         final AsyncTask[] uploadFiles = new AsyncTask[1];                                                                  /*AsyncTask for file upload on another thread*/
 
@@ -91,7 +100,6 @@ public class MainActivity extends ActionBarActivity {
 
         final EditText stepLengthTxt = (EditText) findViewById(R.id.stepLengthField);               /*Textfield to input step length into*/
         stepLengthTxt.setGravity(Gravity.CENTER);                                                   /*Center it cause sparkles*/
-
 
         /**     Variables                                                                         */
         final String userID[] = {null};
@@ -110,7 +118,6 @@ public class MainActivity extends ActionBarActivity {
 
         /**     Initialization                                                                    */
         final Media media = new Media();
-        final Logging logging = new Logging();
 
         if (!media.folderExists(folderName[0])) {
             media.createFolder(folderName[0]);
@@ -162,7 +169,6 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-
         /**     Start session                                                                     */
         switchLogging.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,8 +200,12 @@ public class MainActivity extends ActionBarActivity {
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
 
+                    startAudio();
+
                 } else {
                     Log.i("Main/Logging listener", "off / not logging");
+
+                    stopAudio();
 
                     //TODO CALCULATE BPM HERE
 
@@ -221,6 +231,11 @@ public class MainActivity extends ActionBarActivity {
                     setStepLengthBtn.setEnabled(true);
                     createFileBtn.setEnabled(true);
                     stepLengthTxt.setFocusable(true);
+
+                    if(mWakeLock.isHeld()) {                                                        /*Check if a wakelock is held (Psst, it is!)*/
+                        mWakeLock.release();                                                        /*Release it*/
+                        mWakeLock.acquire(300000);                                                  /*Acquire a new one for 5 minutes to ensure that the log is uploaded*/
+                    }
 
                 }
             }
@@ -275,7 +290,6 @@ public class MainActivity extends ActionBarActivity {
         locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
                 minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
 
-
         /**     Listener for set step length button                                               */
         setStepLengthBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -283,7 +297,16 @@ public class MainActivity extends ActionBarActivity {
                 try {
                     stepLength[0] = Integer.valueOf(stepLengthTxt.getText().toString());            /*Calls the value stored in the text field and saves it to a String*/
                     updatePin(1, true);                                                             /*Update the pin on the activity*/
-                } catch (NumberFormatException e) {
+
+                    try {
+                        InputMethodManager inputManager = (InputMethodManager)
+                                getSystemService(Context.INPUT_METHOD_SERVICE);                         /*Construct an InputMethodManager to control the keyboard*/
+
+                        inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                                InputMethodManager.HIDE_NOT_ALWAYS);                                /*Set the input method (the keyboard) to close when the step length is set correctly*/
+                    } catch (Exception e) { }                                                       /*Ignore the exception cause it doesn't change anything if it fails*/
+
+                } catch (NumberFormatException e) {                                                 /*Checks if anything but a number is input, if it is then toast*/
                     Toast.makeText(getApplicationContext(), "Please only use " +
                                     "numbers and specify the length in meters, e.g. 65",
                             Toast.LENGTH_LONG).show();
@@ -306,6 +329,12 @@ public class MainActivity extends ActionBarActivity {
         });
 
     } // onCreate
+
+    @Override
+    protected void onDestroy() {                                                                    /*Is called when Android OS kills the application in favour of another*/
+        super.onDestroy();
+        mWakeLock.release();                                                                        /*Release any wakelocks to avoid battery drain*/
+    }
 
     /**
      * Check is GPS is enabled, if not alert the user and redirect them to the location settings
@@ -371,7 +400,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
 
-                if (color == true) {
+                if (color) {
                     if (pinName == 1)
                         pin[0].setImageResource(R.mipmap.onegreen);
                     else if (pinName == 2)
@@ -384,7 +413,7 @@ public class MainActivity extends ActionBarActivity {
                     pin[0].startAnimation(textIn);
                 }
 
-                if (color == false) {
+                if (!color) {
                     if (pinName == 1)
                         pin[0].setImageResource(R.mipmap.onered);
                     else if (pinName == 2)

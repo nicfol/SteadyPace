@@ -15,7 +15,7 @@ public class Logging {
      * @param folderName    Name of the directory the logfile is within
      * @param name          Name of the file that should be written to
      */
-    static void startWriter(String folderName, String name) {
+    void startWriter(String folderName, String name) {
 
         try {
             logWriter[0] = new FileWriter(folderName + name);                                       /*Starts a new filewriter to the file 'name' at 'folderName'*/
@@ -33,7 +33,7 @@ public class Logging {
      * @param content       String of what should be written to the logfile.
      * @throws IOException
      */
-    static void write(String content) throws IOException {
+    void write(String content) throws IOException {
 
         try {
             logWriter[0].write(content);                                                            /*Writes the data to the logfile*/
@@ -49,9 +49,8 @@ public class Logging {
      * Stops the FileWriter initialized when the class is constructed.
      *
      * @param content       iterations, avg. speed and time logging in seconds.
-     * @throws IOException
      */
-    static void stopWriter(String content) {
+    void stopWriter(String content) {
 
         try {
             write(content);                                                                         /*Writes a final String to the log*/
