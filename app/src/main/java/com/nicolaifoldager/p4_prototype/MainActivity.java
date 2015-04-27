@@ -211,11 +211,14 @@ public class MainActivity extends ActionBarActivity {
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
 
-                    startAudio();
+                    if(rBtnNoSound.isChecked()) {
+                        audioMode[0] = "none";
+                    }
+
                     if (audioMode[0].equals("cont")) {
                         floatToPd("osc_pitch", 200.0f);
                         floatToPd("osc_volume", 50.0f);
-                    }
+                    }                                                                           
 
                 } else if (iterations[0] < 300) {
 
