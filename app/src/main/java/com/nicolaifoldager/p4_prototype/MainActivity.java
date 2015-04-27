@@ -131,14 +131,16 @@ public class MainActivity extends ActionBarActivity {
             audioMode[0] = media.getAudioMode(folderName[0]);
             BPM[0] = media.getBPM(folderName[0]);
             caliAvgSpeed[0] = media.getAvgSpeed(folderName[0]);
-            System.out.println("Prefs does exist: - ID: " + userID[0] + " Audio: " + audioMode[0] + " BPM: " + BPM[0] + " Calibration speed: " + caliAvgSpeed[0]);
+            System.out.println("Prefs does exist: - ID: " + userID[0] + " Audio: " + audioMode[0] +
+                    " BPM: " + BPM[0] + " Calibration speed: " + caliAvgSpeed[0]);
             rBtnSound.toggle();
             updatePin(2, true);
             rBtnNoSound.setEnabled(false);
         } else {
             userID[0] = media.createUserID();
             audioMode[0] = media.createAudioMode(folderName[0]);
-            System.out.println("Prefs does not exist: - ID: " + userID[0] + " Audio: " + audioMode[0] + " BPM: " + BPM[0] + " Calibration speed: " + caliAvgSpeed[0]);
+            System.out.println("Prefs does not exist: - ID: " + userID[0] + " Audio: " + audioMode[0] +
+                    " BPM: " + BPM[0] + " Calibration speed: " + caliAvgSpeed[0]);
             rBtnNoSound.toggle();
             updatePin(2, true);
             rBtnSound.setEnabled(false);
@@ -218,12 +220,13 @@ public class MainActivity extends ActionBarActivity {
                     if (audioMode[0].equals("cont")) {
                         floatToPd("osc_pitch", 200.0f);
                         floatToPd("osc_volume", 50.0f);
-                    }                                                                           
+                    }
 
                 } else if (iterations[0] < 300) {
 
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);                 /*Construct a new dialog box*/
-                    alertDialogBuilder.setMessage("You've only been running for " + iterations[0] / 60 + "minutes, please keep going for at least 5 minutes in order for your session to be accepted.")   /*Sets the message in the dialog box*/
+                    alertDialogBuilder.setMessage("You've only been running for " + iterations[0]
+                            / 60 + "minutes, please keep going for at least 5 minutes in order for your session to be accepted.")   /*Sets the message in the dialog box*/
                             .setPositiveButton("Keep going",                                         /*Sets the name of the positive button*/
                                     new DialogInterface.OnClickListener() {                                 /*Creates the on click listener service*/
                                         public void onClick(DialogInterface dialog, int id) {
@@ -422,8 +425,7 @@ public class MainActivity extends ActionBarActivity {
                     }
 
                 } catch (NumberFormatException e) {                                                 /*Checks if anything but a number is input, if it is then toast*/
-                    Toast.makeText(getApplicationContext(), "Please only use " +
-                                    "numbers and specify the length in meters, e.g. 65",
+                    Toast.makeText(getApplicationContext(), "Please only use numbers and specify the length in meters, e.g. 65",
                             Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
