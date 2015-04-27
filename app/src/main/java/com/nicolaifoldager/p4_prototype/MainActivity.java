@@ -109,6 +109,7 @@ public class MainActivity extends ActionBarActivity {
         final float[] totalSpeed = {0.0f};                                                          /*Total speed, used to calc average speed*/
         final float[] iterations = {1.0f};                                                          /*How many times the location manager have updated the speed (How many entries we have in the log file)*/
         final float[] avgSpeed = {0.0f};
+        final float[] volume = {0.0f};
 
         final String[] fileName = {null};
         final String[] folderName = {Environment.getExternalStorageDirectory().toString()+
@@ -255,7 +256,8 @@ public class MainActivity extends ActionBarActivity {
                 if(switchLogging.isChecked()) {
                     try {
                         String msg = iterations[0] + "\t" + speedMPS + "\t" + accuracy + "\t\t"
-                                + iterations[0] + "," + getLat + "," + getLon + "\n";
+                                + iterations[0] + "," + getLat + "," + getLon + "\t\t" +
+                                volume[0] + "\n";
                         logging.write(msg);
 
                         totalSpeed[0] += speedMPS;
@@ -299,11 +301,13 @@ public class MainActivity extends ActionBarActivity {
 
                     try {
                         InputMethodManager inputManager = (InputMethodManager)
-                                getSystemService(Context.INPUT_METHOD_SERVICE);                         /*Construct an InputMethodManager to control the keyboard*/
+                                getSystemService(Context.INPUT_METHOD_SERVICE);                     /*Construct an InputMethodManager to control the keyboard*/
 
                         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                                 InputMethodManager.HIDE_NOT_ALWAYS);                                /*Set the input method (the keyboard) to close when the step length is set correctly*/
-                    } catch (Exception e) { }                                                       /*Ignore the exception cause it doesn't change anything if it fails*/
+                    } catch (Exception e) {
+                        e.printStackTrace(System.out);                                              /*Ignore the exception cause it doesn't change anything if it fails*/
+                    }
 
                 } catch (NumberFormatException e) {                                                 /*Checks if anything but a number is input, if it is then toast*/
                     Toast.makeText(getApplicationContext(), "Please only use " +
@@ -453,7 +457,7 @@ public class MainActivity extends ActionBarActivity {
     /**
      * Initializes PD Library and prepares the audio outlet.
      */
-    public void init_pd() {
+    private void init_pd() {
 
         try {
             // Configure the audio glue
@@ -472,7 +476,7 @@ public class MainActivity extends ActionBarActivity {
     /**
      * Loads the PD patch so the app can communicate with it.
      */
-    void loadPdPatch() {
+    private void loadPdPatch() {
 
         try {
             File dir = getFilesDir();
@@ -506,11 +510,11 @@ public class MainActivity extends ActionBarActivity {
     /**
      * Starts the audio
      */
-    public void startAudio() { PdAudio.startAudio(this); }
+    private void startAudio() { PdAudio.startAudio(this); }
 
     /**
      * Stop the audio
      */
-    public void stopAudio() { PdAudio.stopAudio(); }
+    private void stopAudio() { PdAudio.stopAudio(); }
 
 } // Main
