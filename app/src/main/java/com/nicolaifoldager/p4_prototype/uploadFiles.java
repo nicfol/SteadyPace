@@ -20,7 +20,7 @@ public class uploadFiles extends AsyncTask<String, String, String> {
 
         while(running) {
             media.uploadFTP(filename[0]);
-            Log.e("uploadFiles/doInBackgro","count: " + cnt);
+            //Log.e("uploadFiles/doInBackgro","count: " + cnt);
             cnt++;
             if (cnt > 50)
                 running = false;

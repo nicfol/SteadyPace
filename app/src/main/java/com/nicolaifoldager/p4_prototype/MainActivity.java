@@ -110,6 +110,7 @@ public class MainActivity extends ActionBarActivity {
         final float[] iterations = {1.0f};                                                          /*How many times the location manager have updated the speed (How many entries we have in the log file)*/
         final float[] avgSpeed = {0.0f};
         final float[] volume = {0.0f};
+        final float[] caliAvgSpeed = {0.0f};
 
         final String[] fileName = {null};
         final String[] folderName = {Environment.getExternalStorageDirectory().toString()+
@@ -129,14 +130,15 @@ public class MainActivity extends ActionBarActivity {
             userID[0] = media.getUserID(folderName[0]);
             audioMode[0] = media.getAudioMode(folderName[0]);
             BPM[0] = media.getBPM(folderName[0]);
-            System.out.println("Prefs does exist: - ID: " + userID[0] + " Audio: " + audioMode[0] + " BPM: " + BPM[0]);
+            caliAvgSpeed[0] = media.getAvgSpeed(folderName[0]);
+            System.out.println("Prefs does exist: - ID: " + userID[0] + " Audio: " + audioMode[0] + " BPM: " + BPM[0] + " Calibration speed: " + caliAvgSpeed[0]);
             rBtnSound.toggle();
             updatePin(2, true);
             rBtnNoSound.setEnabled(false);
         } else {
             userID[0] = media.createUserID();
             audioMode[0] = media.createAudioMode(folderName[0]);
-            System.out.println("Prefs does not exist: - ID: " + userID[0] + " Audio: " + audioMode[0] + " BPM: " + BPM[0]);
+            System.out.println("Prefs does not exist: - ID: " + userID[0] + " Audio: " + audioMode[0] + " BPM: " + BPM[0] + " Calibration speed: " + caliAvgSpeed[0]);
             rBtnNoSound.toggle();
             updatePin(2, true);
             rBtnSound.setEnabled(false);
@@ -164,10 +166,19 @@ public class MainActivity extends ActionBarActivity {
                     media.createFile(folderName[0], fileName[0]);
                     logging.startWriter(folderName[0], fileName[0]);
 
+                    caliAvgSpeed[0] = media.getAvgSpeed(folderName[0]);                 /** DEBUG */
+
                     updatePin(3, true);
+
+                    //Reset variables
+                    iterations[0] = 1.0f;
+                    avgSpeed[0] = 0.0f;
+                    totalSpeed[0] = 0.0f;
+
                 }
             }
         });
+
 
         /**     Start session                                                                     */
         switchLogging.setOnClickListener(new View.OnClickListener() {
@@ -182,7 +193,7 @@ public class MainActivity extends ActionBarActivity {
                             Toast.LENGTH_LONG).show();
                     switchLogging.toggle();
                 } else if(fileName[0] == null) {
-                    Toast.makeText(getApplicationContext(), "Please start a new session",
+                    Toast.makeText(getApplicationContext(), "Please Start a new session",
                             Toast.LENGTH_LONG).show();
                     switchLogging.toggle();
                 } else if(!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {
@@ -201,15 +212,70 @@ public class MainActivity extends ActionBarActivity {
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
 
                     startAudio();
+                    if (audioMode[0].equals("cont")) {
+                        floatToPd("osc_pitch", 200.0f);
+                        floatToPd("osc_volume", 50.0f);
+                    }
+
+                } else if (iterations[0] < 300) {
+
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);                 /*Construct a new dialog box*/
+                    alertDialogBuilder.setMessage("You've only been running for " + iterations[0] / 60 + "minutes, please keep going for at least 5 minutes in order for your session to be accepted.")   /*Sets the message in the dialog box*/
+                            .setPositiveButton("Keep going",                                         /*Sets the name of the positive button*/
+                                    new DialogInterface.OnClickListener() {                                 /*Creates the on click listener service*/
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            switchLogging.toggle();
+                                            dialog.cancel();
+                                        }
+                                    });
+                    alertDialogBuilder.setNegativeButton("Abort session",                                          /*Sets the name of the negative button*/
+                            new DialogInterface.OnClickListener() {                                         /*Creates the on click listener service*/
+                                public void onClick(DialogInterface dialog, int id) {
+
+                                    Log.i("Main/Logging listener", "off / not logging");
+
+                                    stopAudio();
+
+                                    avgSpeed[0] = totalSpeed[0] / iterations[0];
+
+                                    logging.stopWriter("");
+
+                                    //Reset variables
+                                    iterations[0] = 1.0f;
+                                    avgSpeed[0] = 0.0f;
+                                    totalSpeed[0] = 0.0f;
+                                    fileName[0] = null;
+
+                                    //Update the UI
+                                    for(int i = 1; i <= 4; i++) {
+                                        updatePin(i, false);
+                                    }
+
+                                    //Enables the controls
+                                    setStepLengthBtn.setEnabled(true);
+                                    createFileBtn.setEnabled(true);
+                                    stepLengthTxt.setFocusable(true);
+
+                                    if(mWakeLock.isHeld()) {                                        /*Check if a wakelock is held (Psst, it is!)*/
+                                        mWakeLock.release();                                        /*Release it*/
+                                        mWakeLock.acquire(300000);                                  /*Acquire a new one for 5 minutes to ensure that the log is uploaded*/
+                                    }
+
+                                    dialog.cancel();                                                /*Cancels the dialog box*/
+                                }
+                            });
+                    AlertDialog alert = alertDialogBuilder.create();                                /*Constructs the dialog*/
+                    alert.show();
 
                 } else {
                     Log.i("Main/Logging listener", "off / not logging");
 
                     stopAudio();
 
-                    //TODO CALCULATE BPM HERE
-                    BPM[0] = (avgSpeed[0] * 60) / (stepLength[0] / 100);
+                    avgSpeed[0] = totalSpeed[0] / iterations[0];
 
+                    //TODO CALCULATE BPM HERE
+                    //BPM[0] = (avgSpeed[0] * 60) / (stepLength[0] / 100);
 
                     logging.stopWriter("");
 
@@ -219,11 +285,19 @@ public class MainActivity extends ActionBarActivity {
 
                         prefsMedia.createFile(folderName[0], "prefs.txt");
                         prefsLogging.startWriter(folderName[0], "prefs.txt");
-                        prefsLogging.stopWriter(userID[0] + "\n" + audioMode[0] + "\n" + BPM[0]);
+                        prefsLogging.stopWriter(userID[0] + "\n" + audioMode[0] + "\n" + BPM[0] +
+                        "\n" + avgSpeed[0]);
                     }
 
                     showUploadDialog();                                                             /*Shows a dialog that the application is trying to upload*/
                     uploadFiles[0] = new uploadFiles().execute(fileName[0]);                        /*Start the upload*/
+
+                    //Reset variables
+                    iterations[0] = 1.0f;
+                    avgSpeed[0] = 0.0f;
+                    totalSpeed[0] = 0.0f;
+                    fileName[0] = null;
+
 
                     for(int i = 1; i <= 4; i++) {
                         updatePin(i, false);                                                        /*Set pins to red again*/
@@ -243,20 +317,51 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+
         /**     Location Manager                                                                  */
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
 
-                float accuracy = location.getAccuracy();                                            /*Get the current accuracy from the location manager in meters*/
 
-                float speedMPS = location.getSpeed();                                               /*Get the current speed from the location manager in m/s*/
+                if (audioMode[0].equals("disc") && switchLogging.isChecked()) {
 
-                double getLon = location.getLongitude();                                            /*Gets the longitude from the location manager*/
-                double getLat = location.getLatitude();                                             /*Gets the latitude from the location manager*/
+                    if(location.getSpeed() > caliAvgSpeed[0] * 1.05f ){
+
+                        volume[0] = 1.00f;
+
+                        floatToPd("osc_volume", volume[0]);
+                        Log.i("Main/LocationManager", volume[0] + " sent to pd patch1");
+
+
+                    } else if(location.getSpeed() < caliAvgSpeed[0] * 0.95f) {
+
+                        volume[0] = 1.00f;
+
+                        floatToPd("osc_volume", volume[0]);
+                        Log.i("Main/LocationManager", volume[0] + " sent to pd patch2");
+
+                    } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.05f && location.getSpeed() >= caliAvgSpeed[0] * 0.95f){
+
+                        volume[0] = 0.00f;
+
+                        floatToPd("osc_volume", volume[0]);
+                        Log.i("Main/LocationManager", volume[0] + " sent to pd patch3");
+
+                    }
+
+                }
 
                 if(switchLogging.isChecked()) {
+
                     try {
+                        float accuracy = location.getAccuracy();                                    /*Get the current accuracy from the location manager in meters*/
+
+                        float speedMPS = location.getSpeed();                                       /*Get the current speed from the location manager in m/s*/
+
+                        double getLon = location.getLongitude();                                    /*Gets the longitude from the location manager*/
+                        double getLat = location.getLatitude();                                     /*Gets the latitude from the location manager*/
+
                         String msg = iterations[0] + "\t" + speedMPS + "\t" + accuracy + "\t\t"
                                 + iterations[0] + "," + getLat + "," + getLon + "\t\t" +
                                 volume[0] + "\n";
@@ -264,6 +369,7 @@ public class MainActivity extends ActionBarActivity {
 
                         totalSpeed[0] += speedMPS;
                         iterations[0] += 1;
+
                     } catch (Exception e) {
                         e.printStackTrace(System.out);
                     }
@@ -293,6 +399,7 @@ public class MainActivity extends ActionBarActivity {
         locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
                 minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
 
+
         /**     Listener for set step length button                                               */
         setStepLengthBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -320,6 +427,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+
         /**     Listener for changes in the radio buttons                                         */
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             boolean hasChanged = false;
@@ -340,8 +448,9 @@ public class MainActivity extends ActionBarActivity {
         super.onDestroy();
 
         if(mWakeLock.isHeld()) {
-            mWakeLock.release();                                                                        /*Release any wakelocks to avoid battery drain*/
+            mWakeLock.release();                                                                    /*Release any wakelocks to avoid battery drain*/
         }
+
     }
 
     /**
@@ -403,7 +512,8 @@ public class MainActivity extends ActionBarActivity {
 
         textOut.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {}
+            public void onAnimationStart(Animation animation) {
+            }
 
             @Override
             public void onAnimationEnd(Animation animation) {

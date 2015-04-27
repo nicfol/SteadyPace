@@ -18,6 +18,7 @@ public class Media {
     String m_userID;
     String m_audioMode;
     float m_BPM;
+    float m_avgSpeed;
 
     public boolean folderExists(String directory) {
         File folder = new File(directory);
@@ -123,6 +124,21 @@ public class Media {
             prefsReader.readLine();
             m_BPM = Float.parseFloat(prefsReader.readLine());
             return m_BPM;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0.0f;
+        }
+    }
+
+    public float getAvgSpeed(String directory) {
+        try {
+            BufferedReader prefsReader = new BufferedReader(new FileReader(directory +
+                    "prefs.txt"));                                                                  /*Starts a new bufferedReader from prefs.txt so we can read from it*/
+            prefsReader.readLine();
+            prefsReader.readLine();
+            prefsReader.readLine();
+            m_avgSpeed = Float.parseFloat(prefsReader.readLine());
+            return m_avgSpeed;
         } catch (IOException e) {
             e.printStackTrace();
             return 0.0f;
