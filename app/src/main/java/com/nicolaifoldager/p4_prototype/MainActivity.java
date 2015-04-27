@@ -333,7 +333,10 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {                                                                    /*Is called when Android OS kills the application in favour of another*/
         super.onDestroy();
-        mWakeLock.release();                                                                        /*Release any wakelocks to avoid battery drain*/
+
+        if(mWakeLock.isHeld()) {
+            mWakeLock.release();                                                                        /*Release any wakelocks to avoid battery drain*/
+        }
     }
 
     /**
