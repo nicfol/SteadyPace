@@ -208,6 +208,8 @@ public class MainActivity extends ActionBarActivity {
                     stopAudio();
 
                     //TODO CALCULATE BPM HERE
+                    BPM[0] = (avgSpeed[0] * 60) / (stepLength[0] / 100);
+
 
                     logging.stopWriter("");
 
