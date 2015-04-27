@@ -60,8 +60,7 @@ public class MainActivity extends ActionBarActivity {
     PowerManager.WakeLock mWakeLock = null;                                                         /*Wakelock to keep the cpu running while screen is off during a session*/
 
     /**     PD patch dispatcher                                                                   */
-    PdUiDispatcher dispatcher;                                                              /*PD dispatcher for audio control*/
-
+    PdUiDispatcher dispatcher;                                                                      /*PD dispatcher for audio control*/
 
     /**     Construct Logging class                                                               */
     final Logging logging = new Logging();                                                          /*Constructed globally so it can be closed when the application is closed by onDestroy(); Read more: https://developer.android.com/reference/android/app/Activity.html*/
