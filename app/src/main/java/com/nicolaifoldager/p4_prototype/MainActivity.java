@@ -67,8 +67,8 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState);                                                         /*Tells the JVM to run both the overwritten code in onCreate and the code we've written here*/
+        setContentView(R.layout.activity_main);                                                     /*Tells the JVM which xml layout file it should use*/
 
 
         /**     Wakelock                                                                          */
@@ -90,9 +90,9 @@ public class MainActivity extends ActionBarActivity {
         /**     Call the elements in the UI                                                       */
         final Switch switchLogging = (Switch) findViewById(R.id.switchStartLogging);                /*Logging Switch*/
         final Button createFileBtn = (Button) findViewById(R.id.createFile);                        /*Create new file button*/
-        final Button setStepLengthBtn = (Button) findViewById(R.id.setStepLengthBtn);
+        final Button setStepLengthBtn = (Button) findViewById(R.id.setStepLengthBtn);               /*Button for setting the step length*/
 
-        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
+        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioGroup);                   /*Group of radio buttons that include the two sound feedback modes*/
 
         final RadioButton rBtnNoSound = (RadioButton) findViewById(R.id.rBtnNoSound);               /*Radiobutton for no sound audio mode*/
         final RadioButton rBtnSound = (RadioButton) findViewById(R.id.rBtnSound);                   /*Radiobutton for sound audio mode*/
@@ -120,30 +120,30 @@ public class MainActivity extends ActionBarActivity {
         /**     Initialization                                                                    */
         final Media media = new Media();
 
-        if (!media.folderExists(folderName[0])) {
-            media.createFolder(folderName[0]);
+        if (!media.folderExists(folderName[0])) {                                                   /*Checks if the public data folder for the application exists*/
+            media.createFolder(folderName[0]);                                                      /*If it doesn't then create one*/
         }
 
-        checkGPS();
+        checkGPS();                                                                                 /*Checks if the location provider is set to the GPS, if it tell them to do so*/
 
-        if(media.prefsExists(folderName[0])) {
-            userID[0] = media.getUserID(folderName[0]);
-            audioMode[0] = media.getAudioMode(folderName[0]);
-            BPM[0] = media.getBPM(folderName[0]);
-            caliAvgSpeed[0] = media.getAvgSpeed(folderName[0]);
+        if(media.prefsExists(folderName[0])) {                                                      /*Checks if the prefs.txt file exists*/
+            userID[0] = media.getUserID(folderName[0]);                                             /*Calls for the user ID from the prefs.txt*/
+            audioMode[0] = media.getAudioMode(folderName[0]);                                       /*Calls for the audio mode fom the prefs.txt*/
+            BPM[0] = media.getBPM(folderName[0]);                                                   /*Calls for the BPM from the prefs.txt*/
+            caliAvgSpeed[0] = media.getAvgSpeed(folderName[0]);                                     /*Calls for the speed in the calibration run from the prefs.txt*/
             System.out.println("Prefs does exist: - ID: " + userID[0] + " Audio: " + audioMode[0] +
                     " BPM: " + BPM[0] + " Calibration speed: " + caliAvgSpeed[0]);
-            rBtnSound.toggle();
-            updatePin(2, true);
-            rBtnNoSound.setEnabled(false);
+            rBtnSound.toggle();                                                                     /*Toggle for sound button as the user already have performed a calibration run*/
+            updatePin(2, true);                                                                     /*Update the pin number 2 to green*/
+            rBtnNoSound.setEnabled(false);                                                          /*Disables the no feedback sound*/
         } else {
-            userID[0] = media.createUserID();
-            audioMode[0] = media.createAudioMode(folderName[0]);
+            userID[0] = media.createUserID();                                                       /*Create a User ID*/
+            audioMode[0] = media.createAudioMode(folderName[0]);                                    /*Calculate the audio feedback*/
             System.out.println("Prefs does not exist: - ID: " + userID[0] + " Audio: " + audioMode[0] +
                     " BPM: " + BPM[0] + " Calibration speed: " + caliAvgSpeed[0]);
-            rBtnNoSound.toggle();
-            updatePin(2, true);
-            rBtnSound.setEnabled(false);
+            rBtnNoSound.toggle();                                                                   /*Toggles the no feedback sound*/
+            updatePin(2, true);                                                                     /*Update the pin number 2 to green*/
+            rBtnSound.setEnabled(false);                                                            /*Disable the feedback button as there have been no calibration run*/
         }
 
 
@@ -151,26 +151,26 @@ public class MainActivity extends ActionBarActivity {
         createFileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(switchLogging.isChecked()) {
+                if(switchLogging.isChecked()) {                                                     /*If the app is logging*/
                     Toast.makeText(getApplicationContext(), "Please stop logging before " +
                                     "starting a new session",
                             Toast.LENGTH_LONG).show();
-                } else if(stepLength[0] == 0) {
+                } else if(stepLength[0] == 0) {                                                     /*If step length isn't set*/
                     Toast.makeText(getApplicationContext(), "Please set your step length",
                             Toast.LENGTH_LONG).show();
-                } else if(!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {
+                } else if(!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {                     /*If neither of the radio buttons are enabled (Shouldn't ever happen)*/
                     Toast.makeText(getApplicationContext(), "Please choose a sound feedback mode",
                             Toast.LENGTH_LONG).show();
                 } else {
                     fileName[0] = String.valueOf(userID[0]) + "_" + audioMode[0] + "_" +
                             String.valueOf(System.currentTimeMillis() + ".txt");
 
-                    media.createFile(folderName[0], fileName[0]);
-                    logging.startWriter(folderName[0], fileName[0]);
+                    media.createFile(folderName[0], fileName[0]);                                   /*Create a logfile for this session*/
+                    logging.startWriter(folderName[0], fileName[0]);                                /*Starts a file writer to the logfile*/
 
                     caliAvgSpeed[0] = media.getAvgSpeed(folderName[0]);                 /** DEBUG */
 
-                    updatePin(3, true);
+                    updatePin(3, true);                                                             /*Update pin 3 to green*/
 
                     //Reset variables
                     iterations[0] = 1.0f;
@@ -186,24 +186,24 @@ public class MainActivity extends ActionBarActivity {
         switchLogging.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!checkGPS()) {
+                if(!checkGPS()) {                                                                   /*If the GPS is off*/
                     Toast.makeText(getApplicationContext(), "Please turn on the GPS",
                             Toast.LENGTH_LONG).show();
                     switchLogging.toggle();
-                } else if(stepLength[0] == 0) {
+                } else if(stepLength[0] == 0) {                                                     /*If the step length isn't set*/
                     Toast.makeText(getApplicationContext(), "Please set your step length",
                             Toast.LENGTH_LONG).show();
                     switchLogging.toggle();
-                } else if(fileName[0] == null) {
+                } else if(fileName[0] == null) {                                                    /*If a new session hasn't been started*/
                     Toast.makeText(getApplicationContext(), "Please Start a new session",
                             Toast.LENGTH_LONG).show();
                     switchLogging.toggle();
-                } else if(!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {
+                } else if(!rBtnNoSound.isChecked() && !rBtnSound.isChecked()) {                     /*If neither of the radio buttons are enabled (Shouldn't ever happen)*//*If */
                     Toast.makeText(getApplicationContext(), "Please select an audio mode",
                             Toast.LENGTH_LONG).show();
                     switchLogging.toggle();
-                } else if(switchLogging.isChecked()) {
-                    updatePin(4, true);
+                } else if(switchLogging.isChecked()) {                                              /*If the switch is checked to start logging*/
+                    updatePin(4, true);                                                             /*Update pin 4 to green*/
                     Log.i("Main/Logging listener", "on / logging");
 
                     //Disables the controls
@@ -214,37 +214,38 @@ public class MainActivity extends ActionBarActivity {
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
 
                     if(rBtnNoSound.isChecked()) {
-                        audioMode[0] = "none";
+                        audioMode[0] = "none";                                                      /*If it's the calibration run then disable the sound*/
                     }
 
+                    //If the audio mode is set to continuous
                     if (audioMode[0].equals("cont")) {
                         floatToPd("osc_pitch", 200.0f);
                         floatToPd("osc_volume", 50.0f);
                     }
 
-                } else if (iterations[0] < 300) {
+                } else if (iterations[0] < 300) {                                                   /*If the session haven't been running for 5 minutes then tell the user so*/
 
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);                 /*Construct a new dialog box*/
-                    alertDialogBuilder.setMessage("You've only been running for " + iterations[0]
-                            / 60 + "minutes, please keep going for at least 5 minutes in order for your session to be accepted.")   /*Sets the message in the dialog box*/
-                            .setPositiveButton("Keep going",                                         /*Sets the name of the positive button*/
-                                    new DialogInterface.OnClickListener() {                                 /*Creates the on click listener service*/
-                                        public void onClick(DialogInterface dialog, int id) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);    /*Construct a new dialog box*/
+                    alertDialogBuilder.setMessage("You've only been running for " + iterations[0] / 60 +
+                            "minutes, please keep going for at least 5 minutes in order for your session to be accepted.")  /*Sets the message in the dialog box*/
+                            .setPositiveButton("Keep going",                                        /*Sets the name of the positive button*/
+                                    new DialogInterface.OnClickListener() {                         /*Creates the on click listener service*/
+                                        public void onClick(DialogInterface dialog, int id) {       /*What to do on click*/
                                             switchLogging.toggle();
-                                            dialog.cancel();
+                                            dialog.cancel();                                        /*Destroys the dialog*/
                                         }
                                     });
-                    alertDialogBuilder.setNegativeButton("Abort session",                                          /*Sets the name of the negative button*/
-                            new DialogInterface.OnClickListener() {                                         /*Creates the on click listener service*/
-                                public void onClick(DialogInterface dialog, int id) {
+                    alertDialogBuilder.setNegativeButton("Abort session",                           /*Sets the name of the negative button*/
+                            new DialogInterface.OnClickListener() {                                 /*Creates the on click listener service*/
+                                public void onClick(DialogInterface dialog, int id) {               /*What to do on click*/
 
                                     Log.i("Main/Logging listener", "off / not logging");
 
                                     stopAudio();
 
-                                    avgSpeed[0] = totalSpeed[0] / iterations[0];
+                                    avgSpeed[0] = totalSpeed[0] / iterations[0];                    /*Calculates the average speed based on the total speed and iterations written to te log*/
 
-                                    logging.stopWriter("");
+                                    logging.stopWriter("");                                         /*Stops the file writer*/
 
                                     //Reset variables
                                     iterations[0] = 1.0f;
@@ -283,12 +284,13 @@ public class MainActivity extends ActionBarActivity {
                     //TODO CALCULATE BPM HERE
                     //BPM[0] = (avgSpeed[0] * 60) / (stepLength[0] / 100);
 
-                    logging.stopWriter("");
+                    logging.stopWriter("");                                                         /*Stops the file writer*/
 
-                    if(rBtnNoSound.isChecked()) {
+                    if(rBtnNoSound.isChecked()) {                                                   /*Only runs if it is a calibration run*/
                         Media prefsMedia = new Media();
                         Logging prefsLogging = new Logging();
 
+                        //Creates prefs.txt, start a file writer to it, writes the string and stops the file writer
                         prefsMedia.createFile(folderName[0], "prefs.txt");
                         prefsLogging.startWriter(folderName[0], "prefs.txt");
                         prefsLogging.stopWriter(userID[0] + "\n" + audioMode[0] + "\n" + BPM[0] +
@@ -329,25 +331,24 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onLocationChanged(Location location) {
 
+                if (audioMode[0].equals("disc") && switchLogging.isChecked()) {                     /*Runs only when discrete feedback is chosen and the app is logging*/
 
-                if (audioMode[0].equals("disc") && switchLogging.isChecked()) {
-
-                    if(location.getSpeed() > caliAvgSpeed[0] * 1.05f ){
+                    if(location.getSpeed() > caliAvgSpeed[0] * 1.05f ){                             /*If the speed is 5% over the calibration speed*/
 
                         volume[0] = 1.00f;
 
                         floatToPd("osc_volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch1");
 
-
-                    } else if(location.getSpeed() < caliAvgSpeed[0] * 0.95f) {
+                    } else if(location.getSpeed() < caliAvgSpeed[0] * 0.95f) {                      /*If the speed is 5% under the calibration speed*/
 
                         volume[0] = 1.00f;
 
                         floatToPd("osc_volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch2");
 
-                    } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.05f && location.getSpeed() >= caliAvgSpeed[0] * 0.95f){
+                    } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.05f
+                            && location.getSpeed() >= caliAvgSpeed[0] * 0.95f){                     /*If the speed is within the calibration speed +- 5%*/
 
                         volume[0] = 0.00f;
 
