@@ -78,14 +78,14 @@ public class MainActivity extends ActionBarActivity {
 
         /**     Location Manager                                                                  */
         final LocationManager[] locationManager = {(LocationManager) this.getSystemService
-                (Context.LOCATION_SERVICE)};                                                         /*Construction a LocationManager to call for the location_service in android*/
+                (Context.LOCATION_SERVICE)};                                                        /*Construction a LocationManager to call for the location_service in android*/
 
         /**     PD Init                                                                           */
         init_pd();
         loadPdPatch();
 
         /**     Asynchronized task                                                                */
-        final AsyncTask[] uploadFiles = new AsyncTask[1];                                                                  /*AsyncTask for file upload on another thread*/
+        final AsyncTask[] uploadFiles = new AsyncTask[1];                                           /*AsyncTask for file upload on another thread*/
 
         /**     Call the elements in the UI                                                       */
         final Switch switchLogging = (Switch) findViewById(R.id.switchStartLogging);                /*Logging Switch*/
@@ -217,17 +217,20 @@ public class MainActivity extends ActionBarActivity {
                         audioMode[0] = "none";                                                      /*If it's the calibration run then disable the sound*/
                     }
 
+                    startAudio();                                                                   /*Starts the audio*/
+
                     //If the audio mode is set to continuous
                     if (audioMode[0].equals("cont")) {
-                        floatToPd("osc_pitch", 200.0f);
+                        floatToPd("osc_pitch", 200.0f);                                  /** DEBUG*/
                         floatToPd("osc_volume", 50.0f);
                     }
 
-                } else if (iterations[0] < 300) {                                                   /*If the session haven't been running for 5 minutes then tell the user so*/
+                    //TODO CHANGE THIS TO 300 V
+                } else if (iterations[0] < 1) {                                                   /*If the session haven't been running for 5 minutes then tell the user so*/
 
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);    /*Construct a new dialog box*/
                     alertDialogBuilder.setMessage("You've only been running for " + iterations[0] / 60 +
-                            "minutes, please keep going for at least 5 minutes in order for your session to be accepted.")  /*Sets the message in the dialog box*/
+                            " minutes, please keep going for at least 5 minutes in order for your session to be accepted.")  /*Sets the message in the dialog box*/
                             .setPositiveButton("Keep going",                                        /*Sets the name of the positive button*/
                                     new DialogInterface.OnClickListener() {                         /*Creates the on click listener service*/
                                         public void onClick(DialogInterface dialog, int id) {       /*What to do on click*/
@@ -241,7 +244,7 @@ public class MainActivity extends ActionBarActivity {
 
                                     Log.i("Main/Logging listener", "off / not logging");
 
-                                    stopAudio();
+                                    stopAudio();                                                    /*Stops the audio from the PD patch*/
 
                                     avgSpeed[0] = totalSpeed[0] / iterations[0];                    /*Calculates the average speed based on the total speed and iterations written to te log*/
 
@@ -253,7 +256,7 @@ public class MainActivity extends ActionBarActivity {
                                     totalSpeed[0] = 0.0f;
                                     fileName[0] = null;
 
-                                    //Update the UI
+                                    //Update the pins
                                     for(int i = 1; i <= 4; i++) {
                                         updatePin(i, false);
                                     }
@@ -277,12 +280,11 @@ public class MainActivity extends ActionBarActivity {
                 } else {
                     Log.i("Main/Logging listener", "off / not logging");
 
-                    stopAudio();
+                    stopAudio();                                                                    /*Stops the audio from the pd patch*/
 
-                    avgSpeed[0] = totalSpeed[0] / iterations[0];
+                    avgSpeed[0] = totalSpeed[0] / iterations[0];                                    /*Calculate average speed*/
 
-                    //TODO CALCULATE BPM HERE
-                    //BPM[0] = (avgSpeed[0] * 60) / (stepLength[0] / 100);
+                    BPM[0] = (avgSpeed[0] * 60) / (stepLength[0] / 100);
 
                     logging.stopWriter("");                                                         /*Stops the file writer*/
 
@@ -294,7 +296,7 @@ public class MainActivity extends ActionBarActivity {
                         prefsMedia.createFile(folderName[0], "prefs.txt");
                         prefsLogging.startWriter(folderName[0], "prefs.txt");
                         prefsLogging.stopWriter(userID[0] + "\n" + audioMode[0] + "\n" + BPM[0] +
-                        "\n" + avgSpeed[0]);
+                        "\n" + avgSpeed[0] * 3.6f);
                     }
 
                     showUploadDialog();                                                             /*Shows a dialog that the application is trying to upload*/
@@ -354,9 +356,7 @@ public class MainActivity extends ActionBarActivity {
 
                         floatToPd("osc_volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch3");
-
                     }
-
                 }
 
                 if(switchLogging.isChecked()) {
@@ -380,9 +380,7 @@ public class MainActivity extends ActionBarActivity {
                     } catch (Exception e) {
                         e.printStackTrace(System.out);
                     }
-
                 }
-
             }
 
             @Override
@@ -418,7 +416,6 @@ public class MainActivity extends ActionBarActivity {
                     try {
                         InputMethodManager inputManager = (InputMethodManager)
                                 getSystemService(Context.INPUT_METHOD_SERVICE);                     /*Construct an InputMethodManager to control the keyboard*/
-
                         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                                 InputMethodManager.HIDE_NOT_ALWAYS);                                /*Set the input method (the keyboard) to close when the step length is set correctly*/
                     } catch (Exception e) {
@@ -436,11 +433,11 @@ public class MainActivity extends ActionBarActivity {
 
         /**     Listener for changes in the radio buttons                                         */
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            boolean hasChanged = false;
+            private boolean hasChanged = false;
 
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (!hasChanged) {
+                if (!hasChanged) {                                                                  /*Checks if the pin is already green to avoid multiple animations*/
                     hasChanged = true;
                     updatePin(2, true);                                                             /*Makes pin 4 green*/
                 }
@@ -509,17 +506,16 @@ public class MainActivity extends ActionBarActivity {
         else if (pinName == 4)
             pin[0] = (ImageView) findViewById(R.id.imageViewPin4);
 
-        final Animation textOut = new AlphaAnimation(1.0f, 0.00f);
-        textOut.setDuration(350);
-        final Animation textIn = new AlphaAnimation(0.00f, 1.0f);
-        textIn.setDuration(350);
+        final Animation imgOut = new AlphaAnimation(1.0f, 0.00f);
+        imgOut.setDuration(350);
+        final Animation imgIn = new AlphaAnimation(0.00f, 1.0f);
+        imgIn.setDuration(350);
 
-        pin[0].startAnimation(textOut);
+        pin[0].startAnimation(imgOut);
 
-        textOut.setAnimationListener(new Animation.AnimationListener() {
+        imgOut.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
-            }
+            public void onAnimationStart(Animation animation) { }
 
             @Override
             public void onAnimationEnd(Animation animation) {
@@ -534,7 +530,7 @@ public class MainActivity extends ActionBarActivity {
                     else if (pinName == 4)
                         pin[0].setImageResource(R.mipmap.fourgreen);
 
-                    pin[0].startAnimation(textIn);
+                    pin[0].startAnimation(imgIn);
                 }
 
                 if (!color) {
@@ -547,12 +543,12 @@ public class MainActivity extends ActionBarActivity {
                     else if (pinName == 4)
                         pin[0].setImageResource(R.mipmap.fourred);
 
-                    pin[0].startAnimation(textIn);
+                    pin[0].startAnimation(imgIn);
                 }
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {}
+            public void onAnimationRepeat(Animation animation) { }
         });
     }
 
