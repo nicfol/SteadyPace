@@ -339,6 +339,7 @@ public class MainActivity extends ActionBarActivity {
 
                     if(location.getSpeed() > caliAvgSpeed[0] * 1.0f + deviation){
 
+                        volume[0] = 0.05f;
 
                         floatToPd("osc_volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch1");
