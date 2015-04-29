@@ -294,7 +294,7 @@ public class MainActivity extends ActionBarActivity {
                         prefsMedia.createFile(folderName[0], "prefs.txt");
                         prefsLogging.startWriter(folderName[0], "prefs.txt");
                         prefsLogging.stopWriter(userID[0] + "\n" + audioMode[0] + "\n" + BPM[0] +
-                        "\n" + avgSpeed[0] * 3.6f);
+                        "\n" + avgSpeed[0]);
                     }
 
                     showUploadDialog();                                                             /*Shows a dialog that the application is trying to upload*/
@@ -333,22 +333,24 @@ public class MainActivity extends ActionBarActivity {
 
                 if (audioMode[0].equals("disc") && switchLogging.isChecked()) {                     /*Runs only when discrete feedback is chosen and the app is logging*/
 
-                    if(location.getSpeed() > caliAvgSpeed[0] * 1.05f ){                             /*If the speed is 5% over the calibration speed*/
+                    float deviation = 0.5f;
+
+                    if(location.getSpeed() > caliAvgSpeed[0] * 1.0f + deviation){                   /*If the speed is 5% over the calibration speed*/
 
                         volume[0] = 1.00f;
 
                         floatToPd("osc_volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch1");
 
-                    } else if(location.getSpeed() < caliAvgSpeed[0] * 0.95f) {                      /*If the speed is 5% under the calibration speed*/
+                    } else if(location.getSpeed() < caliAvgSpeed[0] * 1.0f - deviation) {           /*If the speed is 5% under the calibration speed*/
 
                         volume[0] = 1.00f;
 
                         floatToPd("osc_volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch2");
 
-                    } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.05f
-                            && location.getSpeed() >= caliAvgSpeed[0] * 0.95f){                     /*If the speed is within the calibration speed +- 5%*/
+                    } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.0f + deviation
+                            && location.getSpeed() >= caliAvgSpeed[0] * 1.0f - deviation){          /*If the speed is within the calibration speed +- 5%*/
 
                         volume[0] = 0.00f;
 
@@ -397,7 +399,7 @@ public class MainActivity extends ActionBarActivity {
             }
         };
 
-        final int minUpdateTime = 1000;                                                             /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
+        final int minUpdateTime = 500;                                                             /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
         final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
         locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
                 minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
