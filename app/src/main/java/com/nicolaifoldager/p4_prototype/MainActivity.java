@@ -104,7 +104,7 @@ public class MainActivity extends ActionBarActivity {
         final String userID[] = {null};
         final String audioMode[] = {null};
         final float BPM[] = {0.0f};
-        final int[] stepLength = {0};
+        final float[] stepLength = {0};
 
         final float[] totalSpeed = {0.0f};                                                          /*Total speed, used to calc average speed*/
         final float[] iterations = {1.0f};                                                          /*How many times the location manager have updated the speed (How many entries we have in the log file)*/
@@ -213,11 +213,9 @@ public class MainActivity extends ActionBarActivity {
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
 
-                    if(rBtnNoSound.isChecked()) {
-                        audioMode[0] = "none";                                                      /*If it's the calibration run then disable the sound*/
+                    if(!rBtnNoSound.isChecked()) {
+                        startAudio();                                                               /*Starts the audio*/
                     }
-
-                    startAudio();                                                                   /*Starts the audio*/
 
                     //If the audio mode is set to continuous
                     if (audioMode[0].equals("cont")) {
