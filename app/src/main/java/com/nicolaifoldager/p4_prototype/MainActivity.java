@@ -215,6 +215,7 @@ public class MainActivity extends ActionBarActivity {
 
                     if(!rBtnNoSound.isChecked()) {
                         startAudio();                                                               /*Starts the audio*/
+                        //TODO floatToPd("BPM_r", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
                     }
 
                     //If the audio mode is set to continuous
@@ -333,16 +334,16 @@ public class MainActivity extends ActionBarActivity {
 
                 if (audioMode[0].equals("disc") && switchLogging.isChecked()) {                     /*Runs only when discrete feedback is chosen and the app is logging*/
 
-                    float deviation = 0.5f;
+                    float deviation = 0.05f;                                                        /*Deviation in speed when the music should engage */
 
-                    if(location.getSpeed() > caliAvgSpeed[0] * 1.0f + deviation){                   /*If the speed is 5% over the calibration speed*/
+                    if(location.getSpeed() > caliAvgSpeed[0] * 1.0f + deviation){
 
                         volume[0] = 1.00f;
 
                         floatToPd("osc_volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch1");
 
-                    } else if(location.getSpeed() < caliAvgSpeed[0] * 1.0f - deviation) {           /*If the speed is 5% under the calibration speed*/
+                    } else if(location.getSpeed() < caliAvgSpeed[0] * 1.0f - deviation) {
 
                         volume[0] = 1.00f;
 
@@ -350,7 +351,7 @@ public class MainActivity extends ActionBarActivity {
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch2");
 
                     } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.0f + deviation
-                            && location.getSpeed() >= caliAvgSpeed[0] * 1.0f - deviation){          /*If the speed is within the calibration speed +- 5%*/
+                            && location.getSpeed() >= caliAvgSpeed[0] * 1.0f - deviation){
 
                         volume[0] = 0.00f;
 
@@ -399,6 +400,7 @@ public class MainActivity extends ActionBarActivity {
             }
         };
 
+        //TODO Discuss a right update time
         final int minUpdateTime = 500;                                                             /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
         final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
         locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
