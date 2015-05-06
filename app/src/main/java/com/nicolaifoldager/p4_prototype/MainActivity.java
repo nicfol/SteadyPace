@@ -215,13 +215,13 @@ public class MainActivity extends ActionBarActivity {
 
                     if(!rBtnNoSound.isChecked()) {
                         startAudio();                                                               /*Starts the audio*/
-                        //TODO floatToPd("BPM_r", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+                        floatToPd("r_BPM", BPM[0]);                                                 /*Send BPM to the PD patch to give the correct feedback*/
                     }
 
                     //If the audio mode is set to continuous
                     if (audioMode[0].equals("cont")) {
                         floatToPd("osc_pitch", 200.0f);                                  /** DEBUG*/
-                        volume[0] = 5.0f;
+                        volume[0] = 1.0f;
                         floatToPd("osc_volume", volume[0]);
                     }
 
@@ -342,7 +342,6 @@ public class MainActivity extends ActionBarActivity {
                         volume[0] = 0.05f;
 
                         floatToPd("osc_volume", volume[0]);
-                        Log.i("Main/LocationManager", volume[0] + " sent to pd patch1");
 
                     } else if(location.getSpeed() < caliAvgSpeed[0] * 1.0f - deviation) {
 
@@ -599,7 +598,7 @@ public class MainActivity extends ActionBarActivity {
             File dir = getFilesDir();
 
             IoUtils.extractZipResource(getResources().openRawResource(R.raw.pdpatch), dir, true);
-            File patchFile = new File(dir, "pdpatch.pd");
+            File patchFile = new File(dir, "patch.pd");
             PdBase.openPatch(patchFile.getAbsolutePath());
 
             Log.i("MainActiviy/loadPdPatch", "Patch loaded");
