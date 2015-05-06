@@ -215,7 +215,7 @@ public class MainActivity extends ActionBarActivity {
 
                     if(!rBtnNoSound.isChecked()) {
                         startAudio();                                                               /*Starts the audio*/
-                        //TODO floatToPd("BPM_r", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+                        floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
                     }
 
                     //If the audio mode is set to continuous
@@ -258,7 +258,7 @@ public class MainActivity extends ActionBarActivity {
 
                                     //Update the pins
                                     for(int i = 1; i <= 4; i++) {
-                                        updatePin(i, false);
+                                        if(i != 3) { updatePin(i, false); }                         /*This is soo not legal*/
                                     }
 
                                     //Enables the controls
