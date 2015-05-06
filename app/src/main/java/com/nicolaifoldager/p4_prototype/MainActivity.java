@@ -83,7 +83,7 @@ public class MainActivity extends ActionBarActivity {
         /**     PD Init                                                                           */
         init_pd();
         loadPdPatch();
-
+ 
         /**     Asynchronized task                                                                */
         final AsyncTask[] uploadFiles = new AsyncTask[1];                                           /*AsyncTask for file upload on another thread*/
 
@@ -215,14 +215,15 @@ public class MainActivity extends ActionBarActivity {
 
                     if(!rBtnNoSound.isChecked()) {
                         startAudio();                                                               /*Starts the audio*/
-                        //TODO floatToPd("BPM_r", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+                        floatToPd("BPM", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
                     }
 
                     //If the audio mode is set to continuous
                     if (audioMode[0].equals("cont")) {
                         floatToPd("osc_pitch", 200.0f);                                  /** DEBUG*/
                         volume[0] = 5.0f;
-                        floatToPd("osc_volume", volume[0]);
+                        floatToPd("osc_volume", volume[0]);                                         /*this is a comment*/
+
                     }
 
                     //TODO CHANGE THIS TO 300 V
