@@ -213,9 +213,10 @@ public class MainActivity extends ActionBarActivity {
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
 
+
                     if(!rBtnNoSound.isChecked()) {
                         startAudio();                                                               /*Starts the audio*/
-                        //TODO floatToPd("BPM_r", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+                        floatToPd("bpm", BPM[0]);                                                   /*Send BPM to the PD patch to give the correct feedback*/
                     }
 
                     //If the audio mode is set to continuous
@@ -339,10 +340,9 @@ public class MainActivity extends ActionBarActivity {
 
                     if(location.getSpeed() > caliAvgSpeed[0] * 1.0f + deviation){
 
-                        volume[0] = 0.05f;
+                        volume[0] = 0.5f;
 
                         floatToPd("osc_volume", volume[0]);
-                        Log.i("Main/LocationManager", volume[0] + " sent to pd patch1");
 
                     } else if(location.getSpeed() < caliAvgSpeed[0] * 1.0f - deviation) {
 
