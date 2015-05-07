@@ -284,7 +284,7 @@ public class MainActivity extends ActionBarActivity {
 
                     avgSpeed[0] = totalSpeed[0] / iterations[0];                                    /*Calculate average speed*/
 
-                    BPM[0] = (avgSpeed[0] * 60) / (stepLength[0] / 100);
+
 
                     logging.stopWriter("");                                                         /*Stops the file writer*/
 
@@ -292,11 +292,20 @@ public class MainActivity extends ActionBarActivity {
                         Media prefsMedia = new Media();
                         Logging prefsLogging = new Logging();
 
+                        BPM[0] = (avgSpeed[0] * 60) / (stepLength[0] / 100);
+
                         //Creates prefs.txt, start a file writer to it, writes the string and stops the file writer
                         prefsMedia.createFile(folderName[0], "prefs.txt");
                         prefsLogging.startWriter(folderName[0], "prefs.txt");
                         prefsLogging.stopWriter(userID[0] + "\n" + audioMode[0] + "\n" + BPM[0] +
                         "\n" + avgSpeed[0]);
+
+
+                        //Change the feedback to on, in case the app isn't terminated before next session
+                        rBtnNoSound.toggle();
+                        rBtnSound.toggle();
+                        rBtnNoSound.setEnabled(false);
+                        rBtnSound.setEnabled(true);
                     }
 
                     showUploadDialog();                                                             /*Shows a dialog that the application is trying to upload*/
@@ -337,7 +346,11 @@ public class MainActivity extends ActionBarActivity {
 
                     float deviation = 0.05f;                                                        /*Deviation in speed when the music should engage */
 
+                    floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+
                     if(location.getSpeed() > caliAvgSpeed[0] * 1.0f + deviation){
+
+                        floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
 
                         volume[0] = 0.05f;
 
@@ -346,6 +359,8 @@ public class MainActivity extends ActionBarActivity {
 
                     } else if(location.getSpeed() < caliAvgSpeed[0] * 1.0f - deviation) {
 
+                        floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+
                         volume[0] = 0.50f;
 
                         floatToPd("osc_volume", volume[0]);
@@ -353,6 +368,8 @@ public class MainActivity extends ActionBarActivity {
 
                     } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.0f + deviation
                             && location.getSpeed() >= caliAvgSpeed[0] * 1.0f - deviation){
+
+                        floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
 
                         volume[0] = 0.00f;
 
