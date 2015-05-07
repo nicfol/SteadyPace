@@ -415,7 +415,7 @@ public class MainActivity extends ActionBarActivity {
                 Log.i("Main/Location listener", "Provider changed to " + provider);
             }
         };
-        
+
         final int minUpdateTime = 500;                                                             /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
         final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
         locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
@@ -508,7 +508,7 @@ public class MainActivity extends ActionBarActivity {
     /**
      * Updates the pin in the left when the user has succesfully completed a task
      *
-     * @param pinName   The number on the pin that sould be changed corresponds to the pinName
+     * @param pinName   The number on the pin that should be changed corresponds to the pinName
      * @param color     true = green, false = red
      */
     private void updatePin(final int pinName, final boolean color) {
