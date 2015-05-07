@@ -220,13 +220,11 @@ public class MainActivity extends ActionBarActivity {
 
                     //If the audio mode is set to continuous
                     if (audioMode[0].equals("cont")) {
-                        floatToPd("osc_pitch", 200.0f);                                  /** DEBUG*/
                         volume[0] = 5.0f;
-                        floatToPd("osc_volume", volume[0]);
+                        floatToPd("volume", volume[0]);
                     }
 
-                    //TODO CHANGE THIS TO 300 V
-                } else if (iterations[0] < 1) {                                                   /*If the session haven't been running for 5 minutes then tell the user so*/
+                } else if (iterations[0] < 300) {                                                   /*If the session haven't been running for 5 minutes then tell the user so*/
 
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);    /*Construct a new dialog box*/
                     alertDialogBuilder.setMessage("You've only been running for " + iterations[0] / 60 +
@@ -354,7 +352,7 @@ public class MainActivity extends ActionBarActivity {
 
                         volume[0] = 0.05f;
 
-                        floatToPd("osc_volume", volume[0]);
+                        floatToPd("volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch1");
 
                     } else if(location.getSpeed() < caliAvgSpeed[0] * 1.0f - deviation) {
@@ -363,7 +361,7 @@ public class MainActivity extends ActionBarActivity {
 
                         volume[0] = 0.50f;
 
-                        floatToPd("osc_volume", volume[0]);
+                        floatToPd("volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch2");
 
                     } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.0f + deviation
@@ -373,7 +371,7 @@ public class MainActivity extends ActionBarActivity {
 
                         volume[0] = 0.00f;
 
-                        floatToPd("osc_volume", volume[0]);
+                        floatToPd("volume", volume[0]);
                         Log.i("Main/LocationManager", volume[0] + " sent to pd patch3");
                     }
                 }
@@ -417,8 +415,7 @@ public class MainActivity extends ActionBarActivity {
                 Log.i("Main/Location listener", "Provider changed to " + provider);
             }
         };
-
-        //TODO Discuss a right update time
+        
         final int minUpdateTime = 500;                                                             /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
         final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
         locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
@@ -620,10 +617,6 @@ public class MainActivity extends ActionBarActivity {
             PdBase.openPatch(patchFile.getAbsolutePath());
 
             Log.i("MainActiviy/loadPdPatch", "Patch loaded");
-
-            floatToPd("osc_volume", 0.0f);
-
-            floatToPd("osc_pitch", 614.0f);
         } catch (IOException e) {
             e.printStackTrace();
         }
