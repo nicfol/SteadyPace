@@ -65,6 +65,11 @@ public class MainActivity extends ActionBarActivity {
     /**     Construct Logging class                                                               */
     final Logging logging = new Logging();                                                          /*Constructed globally so it can be closed when the application is closed by onDestroy(); Read more: https://developer.android.com/reference/android/app/Activity.html*/
 
+    /**     Location Manager                                                                  */
+    final LocationManager[] locationManager = {(LocationManager) this.getSystemService
+            (Context.LOCATION_SERVICE)};                                                        /*Construction a LocationManager to call for the location_service in android*/
+    LocationListener locationListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);                                                         /*Tells the JVM to run both the overwritten code in onCreate and the code we've written here*/
@@ -76,9 +81,6 @@ public class MainActivity extends ActionBarActivity {
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 MainActivity.class.getSimpleName());                                                /*Construct a new partial wakelock to keep the CPU running when the screen is of*/
 
-        /**     Location Manager                                                                  */
-        final LocationManager[] locationManager = {(LocationManager) this.getSystemService
-                (Context.LOCATION_SERVICE)};                                                        /*Construction a LocationManager to call for the location_service in android*/
 
         /**     PD Init                                                                           */
         init_pd();
@@ -336,7 +338,7 @@ public class MainActivity extends ActionBarActivity {
 
 
         /**     Location Manager                                                                  */
-        LocationListener locationListener = new LocationListener() {
+        locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
 
@@ -471,6 +473,12 @@ public class MainActivity extends ActionBarActivity {
             mWakeLock.release();                                                                    /*Release any wakelocks to avoid battery drain*/
         }
 
+    }
+
+    protected void onPause() {
+        super.onPause();
+
+        locationManager[0].removeUpdates(locationListener);
     }
 
     /**
