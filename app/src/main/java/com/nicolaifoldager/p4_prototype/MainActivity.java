@@ -258,7 +258,7 @@ public class MainActivity extends ActionBarActivity {
 
                                     //Update the pins
                                     for(int i = 1; i <= 4; i++) {
-                                        if(i != 3) { updatePin(i, false); }                         /*This is soo not legal*/
+                                        if(i != 3) { updatePin(i, false); }                         /*Hack to avoid Pin 3 from chaging back to red*/
                                     }
 
                                     //Enables the controls
