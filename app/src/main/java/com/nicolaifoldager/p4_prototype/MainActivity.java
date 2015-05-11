@@ -65,7 +65,7 @@ public class MainActivity extends ActionBarActivity {
     /**     Construct Logging class                                                               */
     final Logging logging = new Logging();                                                          /*Constructed globally so it can be closed when the application is closed by onDestroy(); Read more: https://developer.android.com/reference/android/app/Activity.html*/
 
-    /**     Location Manager                                                                  */
+    /**     Location Manager                                                                      */
     final LocationManager[] locationManager = {(LocationManager) this.getSystemService
             (Context.LOCATION_SERVICE)};                                                        /*Construction a LocationManager to call for the location_service in android*/
     LocationListener locationListener;
@@ -75,12 +75,10 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);                                                         /*Tells the JVM to run both the overwritten code in onCreate and the code we've written here*/
         setContentView(R.layout.activity_main);                                                     /*Tells the JVM which xml layout file it should use*/
 
-
         /**     Wakelock                                                                          */
         final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);             /*Construct a new PowerManager to call from the power service within Android OS*/
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 MainActivity.class.getSimpleName());                                                /*Construct a new partial wakelock to keep the CPU running when the screen is of*/
-
 
         /**     PD Init                                                                           */
         init_pd();
@@ -217,12 +215,12 @@ public class MainActivity extends ActionBarActivity {
 
                     if(!rBtnNoSound.isChecked()) {
                         startAudio();                                                               /*Starts the audio*/
-                        floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+                        floatToPd("bpm", BPM[0]);                                                   /*Send BPM to the PD patch to give the correct feedback*/
                     }
 
                     //If the audio mode is set to continuous
                     if (audioMode[0].equals("cont")) {
-                        volume[0] = 5.0f;
+                        volume[0] = 0.5f;
                         floatToPd("volume", volume[0]);
                     }
 
@@ -283,8 +281,6 @@ public class MainActivity extends ActionBarActivity {
                     stopAudio();                                                                    /*Stops the audio from the pd patch*/
 
                     avgSpeed[0] = totalSpeed[0] / iterations[0];                                    /*Calculate average speed*/
-
-
 
                     logging.stopWriter("");                                                         /*Stops the file writer*/
 

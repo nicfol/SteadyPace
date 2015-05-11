@@ -181,7 +181,7 @@ public class Media {
             return m_BPM;
         } catch (IOException e) {
             e.printStackTrace();
-            return -1.0f;
+            return -2.0f;                                                                           /*Return -2 to indicate that an error has occurred*/
         }
     }
 
@@ -204,7 +204,7 @@ public class Media {
             return m_avgSpeed;
         } catch (IOException e) {
             e.printStackTrace();
-            return -1.0f;
+            return -2.0f;                                                                           /*Return -2 to indicate that an error has occurred*/
         }
     }
 
