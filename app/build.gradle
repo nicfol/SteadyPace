@@ -4,9 +4,9 @@ android {
     signingConfigs {
         config {
             keyAlias 'P4'
-            keyPassword 'remomedfisk1'
+            keyPassword 'fisk123'
             storeFile file('C:/Users/Nicolai/Dropbox/Andet/P4 key/p4_prototype.jks')
-            storePassword 'remomedfisk1'
+            storePassword 'fisk123'
         }
     }
     compileSdkVersion 21
@@ -15,8 +15,8 @@ android {
         applicationId "com.nicolaifoldager.p4_prototype"
         minSdkVersion 16
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.04"
     }
     buildTypes {
         release {

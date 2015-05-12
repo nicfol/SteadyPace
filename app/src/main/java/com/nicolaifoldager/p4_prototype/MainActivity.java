@@ -66,8 +66,7 @@ public class MainActivity extends ActionBarActivity {
     final Logging logging = new Logging();                                                          /*Constructed globally so it can be closed when the application is closed by onDestroy(); Read more: https://developer.android.com/reference/android/app/Activity.html*/
 
     /**     Location Manager                                                                      */
-    final LocationManager[] locationManager = {(LocationManager) this.getSystemService
-            (Context.LOCATION_SERVICE)};                                                        /*Construction a LocationManager to call for the location_service in android*/
+    LocationManager[] locationManager = null;                                                       /*Construction a LocationManager to call for the location_service in android*/
     LocationListener locationListener;
 
     @Override
@@ -224,6 +223,7 @@ public class MainActivity extends ActionBarActivity {
                         floatToPd("volume", volume[0]);
                     }
 
+
                 } else if (iterations[0] < 300) {                                                   /*If the session haven't been running for 5 minutes then tell the user so*/
 
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);    /*Construct a new dialog box*/
@@ -294,8 +294,7 @@ public class MainActivity extends ActionBarActivity {
                         prefsMedia.createFile(folderName[0], "prefs.txt");
                         prefsLogging.startWriter(folderName[0], "prefs.txt");
                         prefsLogging.stopWriter(userID[0] + "\n" + audioMode[0] + "\n" + BPM[0] +
-                        "\n" + avgSpeed[0]);
-
+                        "\n" + (avgSpeed[0] * 0.90f));
 
                         //Change the feedback to on, in case the app isn't terminated before next session
                         rBtnNoSound.toggle();
@@ -334,6 +333,10 @@ public class MainActivity extends ActionBarActivity {
 
 
         /**     Location Manager                                                                  */
+
+        locationManager = new LocationManager[]{(LocationManager) this.getSystemService
+                (Context.LOCATION_SERVICE)};
+
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -342,16 +345,15 @@ public class MainActivity extends ActionBarActivity {
 
                     float deviation = 0.05f;                                                        /*Deviation in speed when the music should engage */
 
-                    floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+                    floatToPd("bpm", BPM[0]);                                                       /*Send BPM to the PD patch to give the correct feedback*/
 
                     if(location.getSpeed() > caliAvgSpeed[0] * 1.0f + deviation){
 
                         floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
 
-                        volume[0] = 0.05f;
+                        volume[0] = 0.55f;
 
-                        floatToPd("volume", volume[0]);
-                        Log.i("Main/LocationManager", volume[0] + " sent to pd patch1");
+                        startAudio();
 
                     } else if(location.getSpeed() < caliAvgSpeed[0] * 1.0f - deviation) {
 
@@ -359,8 +361,7 @@ public class MainActivity extends ActionBarActivity {
 
                         volume[0] = 0.50f;
 
-                        floatToPd("volume", volume[0]);
-                        Log.i("Main/LocationManager", volume[0] + " sent to pd patch2");
+                        startAudio();
 
                     } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.0f + deviation
                             && location.getSpeed() >= caliAvgSpeed[0] * 1.0f - deviation){
@@ -369,18 +370,14 @@ public class MainActivity extends ActionBarActivity {
 
                         volume[0] = 0.00f;
 
-                        floatToPd("volume", volume[0]);
-                        Log.i("Main/LocationManager", volume[0] + " sent to pd patch3");
+                        stopAudio();
                     }
                 }
 
                 if(switchLogging.isChecked()) {
-
                     try {
                         float accuracy = location.getAccuracy();                                    /*Get the current accuracy from the location manager in meters*/
-
                         float speedMPS = location.getSpeed();                                       /*Get the current speed from the location manager in m/s*/
-
                         double getLon = location.getLongitude();                                    /*Gets the longitude from the location manager*/
                         double getLat = location.getLatitude();                                     /*Gets the latitude from the location manager*/
 
@@ -414,7 +411,7 @@ public class MainActivity extends ActionBarActivity {
             }
         };
 
-        final int minUpdateTime = 500;                                                             /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
+        final int minUpdateTime = 500;                                                              /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
         final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
         locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
                 minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
@@ -469,12 +466,12 @@ public class MainActivity extends ActionBarActivity {
             mWakeLock.release();                                                                    /*Release any wakelocks to avoid battery drain*/
         }
 
+        locationManager[0].removeUpdates(locationListener);                                         /*If the application is destroyed then stop requesting location updates*/
+
     }
 
     protected void onPause() {
         super.onPause();
-
-        locationManager[0].removeUpdates(locationListener);
     }
 
     /**
@@ -593,7 +590,6 @@ public class MainActivity extends ActionBarActivity {
      * Initializes PD Library and prepares the audio outlet.
      */
     private void init_pd() {
-
         try {
             // Configure the audio glue
             int sampleRate = AudioParameters.suggestSampleRate();
@@ -605,7 +601,6 @@ public class MainActivity extends ActionBarActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     /**

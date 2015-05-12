@@ -23,7 +23,6 @@ public class uploadFiles extends AsyncTask<String, String, String> {
             if (cnt > 50)
                 running = false;
         }
-
         return null;
     }
 
