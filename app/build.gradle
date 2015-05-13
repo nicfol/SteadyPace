@@ -15,8 +15,8 @@ android {
         applicationId "com.nicolaifoldager.p4_prototype"
         minSdkVersion 16
         targetSdkVersion 21
-        versionCode 4
-        versionName "1.05"
+        versionCode 6
+        versionName "1.06"
     }
     buildTypes {
         release {
