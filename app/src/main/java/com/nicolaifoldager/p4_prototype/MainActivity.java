@@ -340,7 +340,7 @@ public class MainActivity extends ActionBarActivity {
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                if (audioMode[0].equals("disc") && switchLogging.isChecked()) {                     /*Runs only when discrete feedback is chosen and the app is logging*/
+                if (audioMode[0].equals("disc") && switchLogging.isChecked() && !rBtnNoSound.isChecked()) {                     /*Runs only when discrete feedback is chosen and the app is logging*/
 
                     float deviation = 0.05f;                                                        /*Deviation in speed when the music should engage */
 
@@ -410,10 +410,10 @@ public class MainActivity extends ActionBarActivity {
             }
         };
 
-        final int minUpdateTime = 500;                                                              /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
-        final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
-        locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
-                minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
+            final int minUpdateTime = 500;                                                              /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
+            final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
+            locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
+                    minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
 
 
         /**     Listener for set step length button                                               */
@@ -469,9 +469,17 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        locationManager[0].removeUpdates(locationListener);                                         /*If the application is destroyed then stop requesting location updates*/
+    }
+
     protected void onPause() {
         super.onPause();
     }
+
+
 
     /**
      * Check is GPS is enabled, if not alert the user and redirect them to the location settings
