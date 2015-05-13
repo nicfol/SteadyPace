@@ -340,7 +340,6 @@ public class MainActivity extends ActionBarActivity {
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-
                 if (audioMode[0].equals("disc") && switchLogging.isChecked()) {                     /*Runs only when discrete feedback is chosen and the app is logging*/
 
                     float deviation = 0.05f;                                                        /*Deviation in speed when the music should engage */
@@ -349,7 +348,7 @@ public class MainActivity extends ActionBarActivity {
 
                     if(location.getSpeed() > caliAvgSpeed[0] * 1.0f + deviation){
 
-                        floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+                        floatToPd("bpm", BPM[0]);                                                   /*Send BPM to the PD patch to give the correct feedback*/
 
                         volume[0] = 0.55f;
 
@@ -357,7 +356,7 @@ public class MainActivity extends ActionBarActivity {
 
                     } else if(location.getSpeed() < caliAvgSpeed[0] * 1.0f - deviation) {
 
-                        floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+                        floatToPd("bpm", BPM[0]);                                                   /*Send BPM to the PD patch to give the correct feedback*/
 
                         volume[0] = 0.50f;
 
@@ -366,7 +365,7 @@ public class MainActivity extends ActionBarActivity {
                     } else if (PdAudio.isRunning() && location.getSpeed() <= caliAvgSpeed[0] * 1.0f + deviation
                             && location.getSpeed() >= caliAvgSpeed[0] * 1.0f - deviation){
 
-                        floatToPd("bpm", BPM[0]);                                               /*Send BPM to the PD patch to give the correct feedback*/
+                        floatToPd("bpm", BPM[0]);                                                   /*Send BPM to the PD patch to give the correct feedback*/
 
                         volume[0] = 0.00f;
 
