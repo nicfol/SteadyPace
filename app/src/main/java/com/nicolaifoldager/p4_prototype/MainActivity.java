@@ -111,6 +111,10 @@ public class MainActivity extends ActionBarActivity {
         final float[] volume = {0.0f};
         final float[] caliAvgSpeed = {0.0f};
 
+        final long[] startTime = new long[1];
+        final long[] endTime = new long[1];
+        final long[] runTime = new long[1];
+
         final String[] fileName = {null};
         final String[] folderName = {Environment.getExternalStorageDirectory().toString()+
                 "/Android/data/com.nicolaifoldager.p4_prototype/"};                                 /*Specify the path to the file directory we will save to*/
@@ -202,13 +206,15 @@ public class MainActivity extends ActionBarActivity {
                             Toast.LENGTH_LONG).show();
                     switchLogging.toggle();
                 } else if(switchLogging.isChecked()) {                                              /*If the switch is checked to start logging*/
-                    updatePin(4, true);                                                             /*Update pin 4 to green*/
                     Log.i("Main/Logging listener", "on / logging");
+                    updatePin(4, true);                                                             /*Update pin 4 to green*/
 
                     //Disables the controls
                     setStepLengthBtn.setEnabled(false);
                     createFileBtn.setEnabled(false);
                     stepLengthTxt.setFocusable(false);
+
+                    startTime[0] = System.currentTimeMillis() * 1000;
 
                     mWakeLock.acquire();                                                            /*Acquire a wakelock to keep the CPU running and keep logging even if the screen is off*/
 
@@ -224,11 +230,10 @@ public class MainActivity extends ActionBarActivity {
                     }
 
 
-                } else if (iterations[0] < 300) {                                                   /*If the session haven't been running for 5 minutes then tell the user so*/
+                } else if (iterations[0] < 150) {                                                   /*If the session haven't been running for 5 minutes then tell the user so*/
 
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);    /*Construct a new dialog box*/
-                    alertDialogBuilder.setMessage("You've only been running for " + iterations[0] / 60 +
-                            " minutes, please keep going for at least 5 minutes in order for your session to be accepted.")  /*Sets the message in the dialog box*/
+                    alertDialogBuilder.setMessage("Please keep going for at least 5 minutes in order for your session to be accepted.")  /*Sets the message in the dialog box*/
                             .setPositiveButton("Keep going",                                        /*Sets the name of the positive button*/
                                     new DialogInterface.OnClickListener() {                         /*Creates the on click listener service*/
                                         public void onClick(DialogInterface dialog, int id) {       /*What to do on click*/
@@ -288,13 +293,15 @@ public class MainActivity extends ActionBarActivity {
                         Media prefsMedia = new Media();
                         Logging prefsLogging = new Logging();
 
+                        avgSpeed[0] = avgSpeed[0] * 0.90f;
+
                         BPM[0] = (avgSpeed[0] * 60) / (stepLength[0] / 100);
 
                         //Creates prefs.txt, start a file writer to it, writes the string and stops the file writer
                         prefsMedia.createFile(folderName[0], "prefs.txt");
                         prefsLogging.startWriter(folderName[0], "prefs.txt");
                         prefsLogging.stopWriter(userID[0] + "\n" + audioMode[0] + "\n" + BPM[0] +
-                        "\n" + (avgSpeed[0] * 0.90f));
+                        "\n" + avgSpeed[0]);
 
                         //Change the feedback to on, in case the app isn't terminated before next session
                         rBtnNoSound.toggle();
@@ -410,10 +417,10 @@ public class MainActivity extends ActionBarActivity {
             }
         };
 
-            final int minUpdateTime = 500;                                                              /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
-            final int minUpdateLocation = 0;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
-            locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
-                    minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
+        final long minUpdateTime = 500;                                                              /*Minimum time between update requests in milliseconds. 1000 = 1 second*/
+        final float minUpdateLocation = 0.1f;                                                            /*Minimum distance between updates in meters. 0 = no min change.*/
+        locationManager[0].requestLocationUpdates(LocationManager.GPS_PROVIDER, minUpdateTime,
+                minUpdateLocation, locationListener);                                               /*Request new location update every minUpdateTime millisecond & minUpdateLocation meters.*/
 
 
         /**     Listener for set step length button                                               */
@@ -469,11 +476,7 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        locationManager[0].removeUpdates(locationListener);                                         /*If the application is destroyed then stop requesting location updates*/
-    }
+
 
     protected void onPause() {
         super.onPause();
