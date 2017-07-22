@@ -4,9 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AndroidMidi/AndroidMidi.iml" filepath="$PROJECT_DIR$/AndroidMidi/AndroidMidi.iml" />
       <module fileurl="file://$PROJECT_DIR$/PdCore/PdCore.iml" filepath="$PROJECT_DIR$/PdCore/PdCore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SteadyPace.iml" filepath="$PROJECT_DIR$/SteadyPace.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/p4_prototype.iml" filepath="$PROJECT_DIR$/p4_prototype.iml" />
     </modules>
   </component>
 </project>
-
